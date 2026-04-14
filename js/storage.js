@@ -64,9 +64,20 @@ export function getStationPerformance({ discipline = 'all', days = 'all' } = {})
   const stationMap = new Map();
 
   for (const round of rounds) {
+    const isSkeet = round.discipline === 'skeet';
     for (const shot of round.shots || []) {
-      const key = String(shot.station);
-      const curr = stationMap.get(key) || { station: key, hits: 0, total: 0 };
+      const house = isSkeet ? normalizeHouse(shot.house) : null;
+      const key = discipline === 'all'
+        ? `${round.discipline}|${shot.station}|${house || '-'}`
+        : `${shot.station}|${house || '-'}`;
+
+      const curr = stationMap.get(key) || {
+        discipline: round.discipline,
+        station: String(shot.station),
+        house,
+        hits: 0,
+        total: 0,
+      };
       curr.total += 1;
       if (shot.result === 'hit') curr.hits += 1;
       stationMap.set(key, curr);
@@ -77,8 +88,33 @@ export function getStationPerformance({ discipline = 'all', days = 'all' } = {})
     .map(s => ({
       ...s,
       percent: s.total > 0 ? Math.round((s.hits / s.total) * 100) : 0,
+      label: buildStationLabel(s),
     }))
-    .sort((a, b) => Number(a.station) - Number(b.station));
+    .sort((a, b) => {
+      if (a.discipline !== b.discipline) return a.discipline.localeCompare(b.discipline);
+      if (Number(a.station) !== Number(b.station)) return Number(a.station) - Number(b.station);
+      return (a.house || '').localeCompare(b.house || '');
+    });
+}
+
+function normalizeHouse(house) {
+  if (house === 'high_house') return 'High';
+  if (house === 'low_house') return 'Low';
+  return null;
+}
+
+function disciplineShortLabel(discipline) {
+  if (discipline === 'american_trap') return 'Trap';
+  if (discipline === 'skeet') return 'Skeet';
+  if (discipline === 'olympic_trap') return 'Olympic';
+  return discipline;
+}
+
+function buildStationLabel(row) {
+  const discipline = disciplineShortLabel(row.discipline);
+  const station = `St ${row.station}`;
+  const house = row.house ? ` ${row.house}` : '';
+  return `${discipline} ${station}${house}`;
 }
 
 export function clearAllRounds() {

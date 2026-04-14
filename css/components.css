@@ -858,8 +858,59 @@
   stroke-width: 2.5;
 }
 
+.trend-line-avg {
+  fill: none;
+  stroke: var(--accent-skeet);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.trend-line-best {
+  fill: none;
+  stroke: var(--hit-color);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+  opacity: 0.9;
+}
+
 .analytics-trend-chart circle {
   fill: var(--accent-current);
+}
+
+.analytics-trend-legend {
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.analytics-trend-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-line {
+  width: 16px;
+  height: 2px;
+  background: var(--text-secondary);
+  display: inline-block;
+}
+
+.legend-main {
+  background: var(--accent-current);
+}
+
+.legend-avg {
+  background: linear-gradient(to right, var(--accent-skeet) 60%, transparent 0%);
+  background-size: 6px 2px;
+}
+
+.legend-best {
+  background: linear-gradient(to right, var(--hit-color) 40%, transparent 0%);
+  background-size: 4px 2px;
 }
 
 .analytics-station-bars {
