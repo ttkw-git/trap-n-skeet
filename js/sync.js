@@ -14,7 +14,7 @@ import {
   auth, db, googleProvider,
   signInWithPopup, signInWithRedirect, getRedirectResult,
   signOut, onAuthStateChanged,
-  doc, setDoc, getDocs, collection,
+  doc, setDoc, getDocs, collection, writeBatch,
 } from './firebase.js';
 
 import { loadAllRounds, saveRound as saveLocal } from './storage.js';
