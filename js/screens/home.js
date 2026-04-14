@@ -4,10 +4,11 @@
 
 import { loadSettings, saveSettings } from '../storage.js';
 
-let selectedDiscipline = null;
-let selectedMode       = 'practice_25';
-let onStartCallback    = null;
-let onHistoryCallback  = null;
+let selectedDiscipline  = null;
+let selectedMode        = 'practice_25';
+let selectedYardage     = 20;
+let onStartCallback     = null;
+let onHistoryCallback   = null;
 let onAnalyticsCallback = null;
 
 export function initHome({ onStart, onHistory, onAnalytics }) {
@@ -25,10 +26,14 @@ export function initHome({ onStart, onHistory, onAnalytics }) {
     btn.addEventListener('click', () => selectMode(btn.dataset.mode));
   });
 
+  // Yardage stepper (Handicap Trap)
+  document.getElementById('yardage-dec').addEventListener('click', () => adjustYardage(-1));
+  document.getElementById('yardage-inc').addEventListener('click', () => adjustYardage(+1));
+
   // Start button
   document.getElementById('btn-start-round').addEventListener('click', () => {
     if (selectedDiscipline) {
-      onStartCallback({ discipline: selectedDiscipline, mode: selectedMode });
+      onStartCallback({ discipline: selectedDiscipline, mode: selectedMode, yardage: selectedYardage });
     }
   });
 
@@ -56,9 +61,12 @@ export function onEnter() {
   // Reset selection state
   selectedDiscipline = null;
   selectedMode       = 'practice_25';
+  selectedYardage    = 20;
 
   document.querySelectorAll('.discipline-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('olympic-mode-selector').classList.add('hidden');
+  document.getElementById('handicap-yardage-selector').classList.add('hidden');
+  document.getElementById('yardage-value').textContent = '20 yd';
   document.getElementById('btn-start-round').classList.add('hidden');
 
   // Load saved settings
@@ -74,12 +82,21 @@ function selectDiscipline(discipline) {
     b.classList.toggle('selected', b.dataset.discipline === discipline);
   });
 
-  // Show Olympic mode selector only for Olympic Trap
-  const olympicSelector = document.getElementById('olympic-mode-selector');
+  // Show/hide discipline-specific selectors
+  const olympicSelector  = document.getElementById('olympic-mode-selector');
+  const handicapSelector = document.getElementById('handicap-yardage-selector');
+
   if (discipline === 'olympic_trap') {
     olympicSelector.classList.remove('hidden');
+    handicapSelector.classList.add('hidden');
+    selectedMode = 'practice_25';
+  } else if (discipline === 'handicap_trap') {
+    handicapSelector.classList.remove('hidden');
+    olympicSelector.classList.add('hidden');
+    selectedMode = 'practice_25';
   } else {
     olympicSelector.classList.add('hidden');
+    handicapSelector.classList.add('hidden');
     selectedMode = 'practice_25';
   }
 
@@ -96,6 +113,13 @@ function selectMode(mode) {
 
 function openSettings() {
   import('../app.js').then(m => m.navigate('settings'));
+}
+
+function adjustYardage(delta) {
+  selectedYardage = Math.min(27, Math.max(16, selectedYardage + delta));
+  document.getElementById('yardage-value').textContent = `${selectedYardage} yd`;
+  document.getElementById('yardage-dec').disabled = selectedYardage <= 16;
+  document.getElementById('yardage-inc').disabled = selectedYardage >= 27;
 }
 
 function saveCurrentSettings() {

@@ -72,7 +72,7 @@ function renderHistory() {
   }
 
   // ── Stats chips ──────────────────────────────
-  const disciplines = ['american_trap', 'skeet', 'olympic_trap'];
+  const disciplines = ['american_trap', 'skeet', 'olympic_trap', 'handicap_trap'];
   for (const disc of disciplines) {
     const rounds = filteredRounds.filter(r => r.discipline === disc && r.maxScore <= 25);
     if (rounds.length === 0) continue;
@@ -185,7 +185,7 @@ function buildHistoryItem(round) {
     <div class="history-item-header">
       <div class="history-discipline-dot" style="background:${color}"></div>
       <div class="history-item-info">
-        <div class="history-item-title">${disciplineLabel(round.discipline)}${round.mode === 'competition_125' ? ' (125)' : ''}</div>
+        <div class="history-item-title">${round.discipline === 'handicap_trap' && round.yardage ? `Handicap Trap · ${round.yardage} yd` : `${disciplineLabel(round.discipline)}${round.mode === 'competition_125' ? ' (125)' : ''}`}</div>
         <div class="history-item-date">${date}</div>
       </div>
       <div>

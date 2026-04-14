@@ -147,6 +147,48 @@
   color: #fff;
 }
 
+/* Yardage stepper (Handicap Trap) */
+.yardage-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+}
+.yardage-step-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+.yardage-step-btn:active {
+  background: var(--accent-trap);
+  color: #fff;
+  border-color: var(--accent-trap);
+}
+.yardage-step-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.yardage-display {
+  min-width: 72px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
 /* Start button */
 .start-btn {
   width: 100%;

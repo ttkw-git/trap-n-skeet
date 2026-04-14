@@ -107,6 +107,7 @@ function disciplineShortLabel(discipline) {
   if (discipline === 'american_trap') return 'Trap';
   if (discipline === 'skeet') return 'Skeet';
   if (discipline === 'olympic_trap') return 'Olympic';
+  if (discipline === 'handicap_trap') return 'Handicap';
   return discipline;
 }
 
@@ -121,9 +122,9 @@ export function clearAllRounds() {
   localStorage.removeItem(ROUNDS_KEY);
 }
 
-export function createRound(discipline, mode = 'practice_25') {
+export function createRound(discipline, mode = 'practice_25', yardage = null) {
   const maxScore = (discipline === 'olympic_trap' && mode === 'competition_125') ? 125 : 25;
-  return {
+  const round = {
     id: `round_${Date.now()}`,
     discipline,
     mode,
@@ -133,6 +134,8 @@ export function createRound(discipline, mode = 'practice_25') {
     maxScore,
     shots: [],
   };
+  if (yardage !== null) round.yardage = yardage;
+  return round;
 }
 
 // ── Settings ──────────────────────────────────

@@ -5,12 +5,13 @@
 import { createRound, saveRound, loadSettings } from '../storage.js';
 import { saveRoundToCloud } from '../sync.js';
 import { disciplineLabel, vibrate, confirm } from '../utils.js';
-import { AmericanTrapEngine } from '../disciplines/american-trap.js';
+import { AmericanTrapEngine, HandicapTrapEngine } from '../disciplines/american-trap.js';
 import { SkeetEngine }        from '../disciplines/skeet.js';
 import { OlympicTrapEngine }  from '../disciplines/olympic-trap.js';
 
 let engine      = null;
 let round       = null;
+let activeYardage = null;
 let onDoneCallback = null;
 
 export function initShooting({ onDone }) {
@@ -22,10 +23,14 @@ export function initShooting({ onDone }) {
   document.getElementById('btn-end-round').addEventListener('click', endRoundEarly);
 }
 
-export function onEnter({ discipline, mode }) {
+export function onEnter({ discipline, mode, yardage }) {
+  activeYardage = yardage ?? null;
+
   // Create engine
   if (discipline === 'american_trap') {
     engine = new AmericanTrapEngine();
+  } else if (discipline === 'handicap_trap') {
+    engine = new HandicapTrapEngine(activeYardage);
   } else if (discipline === 'skeet') {
     engine = new SkeetEngine();
   } else {
@@ -33,10 +38,13 @@ export function onEnter({ discipline, mode }) {
   }
 
   // Create round object
-  round = createRound(discipline, mode);
+  round = createRound(discipline, mode, activeYardage);
 
   // Update static labels
-  document.getElementById('shooting-discipline-label').textContent = disciplineLabel(discipline);
+  const label = discipline === 'handicap_trap' && activeYardage
+    ? `Handicap Trap · ${activeYardage} yd`
+    : disciplineLabel(discipline);
+  document.getElementById('shooting-discipline-label').textContent = label;
   document.getElementById('shooting-max').textContent = engine.total;
   document.body.dataset.discipline = discipline;
 
@@ -160,7 +168,7 @@ function renderDiagram(shot) {
   const el   = document.getElementById('station-diagram');
   const disc = round.discipline;
 
-  if (disc === 'american_trap') {
+  if (disc === 'american_trap' || disc === 'handicap_trap') {
     el.innerHTML = buildTrapDiagram(shot.station, 5);
   } else if (disc === 'skeet') {
     el.innerHTML = buildSkeetDiagram(shot);
