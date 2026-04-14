@@ -3,9 +3,12 @@
 // ═══════════════════════════════════════════════
 
 import { disciplineLabel, formatPercent, getRating } from '../utils.js';
+import { shareRoundAsImage } from '../share.js';
 
 let onShootAgainCallback = null;
 let onHistoryCallback    = null;
+let currentRound         = null;
+let currentEngine        = null;
 
 export function initSummary({ onShootAgain, onHistory }) {
   onShootAgainCallback = onShootAgain;
@@ -13,9 +16,14 @@ export function initSummary({ onShootAgain, onHistory }) {
 
   document.getElementById('btn-shoot-again').addEventListener('click', onShootAgainCallback);
   document.getElementById('btn-go-history').addEventListener('click', onHistoryCallback);
+  document.getElementById('btn-share-round').addEventListener('click', () => {
+    shareRoundAsImage(currentRound, currentEngine);
+  });
 }
 
 export function onEnter({ round, engine }) {
+  currentRound  = round;
+  currentEngine = engine;
   const { discipline, score, maxScore } = round;
   const pct = formatPercent(score, maxScore);
 
