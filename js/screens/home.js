@@ -21,12 +21,17 @@ export function initHome({ onStart, onHistory, onAnalytics }) {
     btn.addEventListener('click', () => selectDiscipline(btn.dataset.discipline));
   });
 
-  // Mode buttons (Olympic Trap)
-  document.querySelectorAll('.mode-btn').forEach(btn => {
+  // Olympic Trap mode buttons (change selectedMode)
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
     btn.addEventListener('click', () => selectMode(btn.dataset.mode));
   });
 
-  // Yardage stepper (Handicap Trap)
+  // American Trap sub-mode buttons (Standard vs Handicap — change selectedDiscipline)
+  document.querySelectorAll('[data-set-discipline]').forEach(btn => {
+    btn.addEventListener('click', () => selectAmericanMode(btn.dataset.setDiscipline));
+  });
+
+  // Yardage stepper (Handicap mode)
   document.getElementById('yardage-dec').addEventListener('click', () => adjustYardage(-1));
   document.getElementById('yardage-inc').addEventListener('click', () => adjustYardage(+1));
 
@@ -64,10 +69,22 @@ export function onEnter() {
   selectedYardage    = 20;
 
   document.querySelectorAll('.discipline-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('olympic-mode-selector').classList.add('hidden');
+
+  // Hide all sub-selectors
+  document.getElementById('american-mode-selector').classList.add('hidden');
   document.getElementById('handicap-yardage-selector').classList.add('hidden');
-  document.getElementById('yardage-value').textContent = '20 yd';
+  document.getElementById('olympic-mode-selector').classList.add('hidden');
   document.getElementById('btn-start-round').classList.add('hidden');
+
+  // Reset American mode toggle to "Standard"
+  document.querySelectorAll('[data-set-discipline]').forEach(b => {
+    b.classList.toggle('active', b.dataset.setDiscipline === 'american_trap');
+  });
+
+  // Reset yardage stepper
+  document.getElementById('yardage-value').textContent = '20 yd';
+  document.getElementById('yardage-dec').disabled = false;
+  document.getElementById('yardage-inc').disabled = false;
 
   // Load saved settings
   const settings = loadSettings();
@@ -76,37 +93,60 @@ export function onEnter() {
 }
 
 function selectDiscipline(discipline) {
-  selectedDiscipline = discipline;
-
   document.querySelectorAll('.discipline-btn').forEach(b => {
     b.classList.toggle('selected', b.dataset.discipline === discipline);
   });
 
-  // Show/hide discipline-specific selectors
+  const americanSelector = document.getElementById('american-mode-selector');
   const olympicSelector  = document.getElementById('olympic-mode-selector');
   const handicapSelector = document.getElementById('handicap-yardage-selector');
 
-  if (discipline === 'olympic_trap') {
+  if (discipline === 'american_trap') {
+    americanSelector.classList.remove('hidden');
+    olympicSelector.classList.add('hidden');
+    // Default to Standard sub-mode
+    selectAmericanMode('american_trap');
+    selectedMode = 'practice_25';
+  } else if (discipline === 'olympic_trap') {
     olympicSelector.classList.remove('hidden');
+    americanSelector.classList.add('hidden');
     handicapSelector.classList.add('hidden');
+    selectedDiscipline = 'olympic_trap';
     selectedMode = 'practice_25';
-  } else if (discipline === 'handicap_trap') {
-    handicapSelector.classList.remove('hidden');
-    olympicSelector.classList.add('hidden');
-    selectedMode = 'practice_25';
+    document.body.dataset.discipline = 'olympic_trap';
   } else {
+    americanSelector.classList.add('hidden');
     olympicSelector.classList.add('hidden');
     handicapSelector.classList.add('hidden');
+    selectedDiscipline = discipline;
     selectedMode = 'practice_25';
+    document.body.dataset.discipline = discipline;
   }
 
   document.getElementById('btn-start-round').classList.remove('hidden');
-  document.body.dataset.discipline = discipline;
+}
+
+// Switches between "Standard" (american_trap) and "Handicap" (handicap_trap)
+// within the American Trap discipline card
+function selectAmericanMode(newDiscipline) {
+  selectedDiscipline = newDiscipline;
+  document.body.dataset.discipline = newDiscipline;
+
+  document.querySelectorAll('[data-set-discipline]').forEach(b => {
+    b.classList.toggle('active', b.dataset.setDiscipline === newDiscipline);
+  });
+
+  const handicapSelector = document.getElementById('handicap-yardage-selector');
+  if (newDiscipline === 'handicap_trap') {
+    handicapSelector.classList.remove('hidden');
+  } else {
+    handicapSelector.classList.add('hidden');
+  }
 }
 
 function selectMode(mode) {
   selectedMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => {
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
 }

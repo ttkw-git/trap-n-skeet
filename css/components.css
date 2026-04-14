@@ -96,9 +96,10 @@
 .discipline-btn.selected {
   background: var(--bg-elevated);
 }
-.discipline-btn.trap.selected    { border-color: var(--accent-trap); }
-.discipline-btn.skeet.selected   { border-color: var(--accent-skeet); }
-.discipline-btn.olympic.selected { border-color: var(--accent-olympic); }
+.discipline-btn.trap.selected     { border-color: var(--accent-trap); }
+.discipline-btn.skeet.selected    { border-color: var(--accent-skeet); }
+.discipline-btn.olympic.selected  { border-color: var(--accent-olympic); }
+.discipline-btn.handicap.selected { border-color: var(--accent-handicap); }
 
 .discipline-icon {
   font-size: 28px;
@@ -143,7 +144,7 @@
   transition: background var(--transition-mid), color var(--transition-mid);
 }
 .mode-btn.active {
-  background: var(--accent-olympic);
+  background: var(--accent-current);
   color: #fff;
 }
 
@@ -172,9 +173,9 @@
   transition: background var(--transition-fast), opacity var(--transition-fast);
 }
 .yardage-step-btn:active {
-  background: var(--accent-trap);
+  background: var(--accent-handicap);
   color: #fff;
-  border-color: var(--accent-trap);
+  border-color: var(--accent-handicap);
 }
 .yardage-step-btn:disabled {
   opacity: 0.35;
@@ -1200,6 +1201,9 @@ body[data-discipline="skeet"] {
 }
 body[data-discipline="olympic_trap"] {
   --accent-current: var(--accent-olympic);
+}
+body[data-discipline="handicap_trap"] {
+  --accent-current: var(--accent-handicap);
 }
 
 @media (max-width: 480px) {

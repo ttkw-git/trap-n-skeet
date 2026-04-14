@@ -16,10 +16,11 @@
   --text-muted:     #606060;
 
   /* Discipline accent colors */
-  --accent-trap:    #e67e22;  /* orange */
-  --accent-skeet:   #2980b9;  /* blue */
-  --accent-olympic: #8e44ad;  /* purple */
-  --accent-current: #e67e22;  /* updated dynamically by JS */
+  --accent-trap:     #e67e22;  /* orange */
+  --accent-skeet:    #2980b9;  /* blue */
+  --accent-olympic:  #8e44ad;  /* purple */
+  --accent-handicap: #d4a017;  /* amber/gold */
+  --accent-current:  #e67e22;  /* updated dynamically by JS */
 
   /* Action colors */
   --hit-color:        #27ae60;

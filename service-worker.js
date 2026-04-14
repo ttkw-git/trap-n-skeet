@@ -3,7 +3,7 @@
 // Bump CACHE_NAME version when deploying updates
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'trapnskeet-v5';
+const CACHE_NAME = 'trapnskeet-v6';
 
 const ASSETS = [
   './index.html',

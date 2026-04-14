@@ -37,8 +37,8 @@ export function onEnter({ discipline, mode, yardage }) {
     engine = new OlympicTrapEngine(mode);
   }
 
-  // Create round object
-  round = createRound(discipline, mode, activeYardage);
+  // Create round object (only attach yardage for handicap rounds)
+  round = createRound(discipline, mode, discipline === 'handicap_trap' ? activeYardage : null);
 
   // Update static labels
   const label = discipline === 'handicap_trap' && activeYardage
