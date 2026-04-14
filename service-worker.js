@@ -3,7 +3,7 @@
 // Bump CACHE_NAME version when deploying updates
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'trapnskeet-v1';
+const CACHE_NAME = 'trapnskeet-v2';
 
 const ASSETS = [
   './index.html',
@@ -13,6 +13,8 @@ const ASSETS = [
   './js/app.js',
   './js/storage.js',
   './js/utils.js',
+  './js/firebase.js',
+  './js/sync.js',
   './js/disciplines/american-trap.js',
   './js/disciplines/skeet.js',
   './js/disciplines/olympic-trap.js',
@@ -23,6 +25,9 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
+
+// Firebase CDN URLs — never cache these, always fetch fresh from Google
+const FIREBASE_CDN = 'https://www.gstatic.com/firebasejs/';
 
 // Install: cache all assets
 self.addEventListener('install', event => {
@@ -44,8 +49,12 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: serve from cache, fallback to network
+// Fetch: Firebase CDN always from network; everything else cache-first
 self.addEventListener('fetch', event => {
+  if (event.request.url.startsWith(FIREBASE_CDN)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );

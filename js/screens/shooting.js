@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════
 
 import { createRound, saveRound, loadSettings } from '../storage.js';
+import { saveRoundToCloud } from '../sync.js';
 import { disciplineLabel, vibrate, confirm } from '../utils.js';
 import { AmericanTrapEngine } from '../disciplines/american-trap.js';
 import { SkeetEngine }        from '../disciplines/skeet.js';
@@ -85,7 +86,8 @@ function finishRound() {
   round.completedAt = new Date().toISOString();
   round.score       = engine.score;
   round.shots       = engine.shots;
-  saveRound(round);
+  saveRound(round);           // always save locally first
+  saveRoundToCloud(round);    // push to Firestore (non-blocking, silent fail if offline)
   onDoneCallback({ round, engine });
 }
 
