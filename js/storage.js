@@ -30,13 +30,14 @@ export function loadRoundsByDiscipline(discipline) {
   return loadAllRounds().filter(r => r.discipline === discipline && r.completedAt);
 }
 
-export function loadCompletedRounds({ discipline = 'all', days = 'all' } = {}) {
+export function loadCompletedRounds({ discipline = 'all', days = 'all', includePractice = false } = {}) {
   const now = Date.now();
   const dayCount = days === 'all' ? null : Number(days);
   const cutoff = Number.isFinite(dayCount) ? now - (dayCount * 24 * 60 * 60 * 1000) : null;
 
   return loadAllRounds().filter(round => {
     if (!round.completedAt) return false;
+    if (!includePractice && round.mode === 'station_practice') return false;
     if (discipline !== 'all' && round.discipline !== discipline) return false;
     if (!cutoff) return true;
 
@@ -45,8 +46,8 @@ export function loadCompletedRounds({ discipline = 'all', days = 'all' } = {}) {
   });
 }
 
-export function getTrendPoints({ discipline = 'all', days = 'all' } = {}) {
-  const rounds = loadCompletedRounds({ discipline, days })
+export function getTrendPoints({ discipline = 'all', days = 'all', includePractice = false } = {}) {
+  const rounds = loadCompletedRounds({ discipline, days, includePractice })
     .sort((a, b) => new Date(a.startedAt) - new Date(b.startedAt));
 
   return rounds.map(round => ({
@@ -59,8 +60,8 @@ export function getTrendPoints({ discipline = 'all', days = 'all' } = {}) {
   }));
 }
 
-export function getStationPerformance({ discipline = 'all', days = 'all' } = {}) {
-  const rounds = loadCompletedRounds({ discipline, days });
+export function getStationPerformance({ discipline = 'all', days = 'all', includePractice = false } = {}) {
+  const rounds = loadCompletedRounds({ discipline, days, includePractice });
   const stationMap = new Map();
 
   for (const round of rounds) {
@@ -122,8 +123,14 @@ export function clearAllRounds() {
   localStorage.removeItem(ROUNDS_KEY);
 }
 
-export function createRound(discipline, mode = 'practice_25', yardage = null) {
-  const maxScore = (discipline === 'olympic_trap' && mode === 'competition_125') ? 125 : 25;
+export function createRound(discipline, mode = 'practice_25', yardage = null, practiceConfig = null) {
+  let maxScore;
+  if (mode === 'station_practice' && practiceConfig) {
+    maxScore = Math.max(1, Math.min(200, Math.floor(Number(practiceConfig.shotCount) || 1)));
+  } else {
+    maxScore = (discipline === 'olympic_trap' && mode === 'competition_125') ? 125 : 25;
+  }
+
   const round = {
     id: `round_${Date.now()}`,
     discipline,
@@ -135,6 +142,7 @@ export function createRound(discipline, mode = 'practice_25', yardage = null) {
     shots: [],
   };
   if (yardage !== null) round.yardage = yardage;
+  if (practiceConfig !== null) round.practiceConfig = practiceConfig;
   return round;
 }
 

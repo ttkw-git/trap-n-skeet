@@ -11,11 +11,12 @@ let onBackCallback = null;
 let filteredRounds = [];
 
 const filterState = {
-  discipline: 'all',
-  from: '',
-  to: '',
-  minPct: '',
-  query: '',
+  discipline:      'all',
+  from:            '',
+  to:              '',
+  minPct:          '',
+  query:           '',
+  includePractice: false,
 };
 
 export function initHistory({ onBack }) {
@@ -28,6 +29,10 @@ export function initHistory({ onBack }) {
   });
   document.getElementById('btn-export-json').addEventListener('click', () => {
     if (filteredRounds.length > 0) downloadRoundsAsJSON(filteredRounds);
+  });
+  document.getElementById('history-filter-practice').addEventListener('change', (e) => {
+    filterState.includePractice = e.target.checked;
+    renderHistory();
   });
 
   bindFilterInputs();
@@ -74,7 +79,8 @@ function renderHistory() {
   // ── Stats chips ──────────────────────────────
   const disciplines = ['american_trap', 'skeet', 'olympic_trap', 'handicap_trap'];
   for (const disc of disciplines) {
-    const rounds = filteredRounds.filter(r => r.discipline === disc && r.maxScore <= 25);
+    const rounds = filteredRounds.filter(r =>
+      r.discipline === disc && r.maxScore <= 25 && r.mode !== 'station_practice');
     if (rounds.length === 0) continue;
 
     const avg = rounds.reduce((sum, r) => sum + r.score, 0) / rounds.length;
@@ -129,17 +135,19 @@ function bindFilterInputs() {
 }
 
 function resetFilters() {
-  filterState.discipline = 'all';
-  filterState.from = '';
-  filterState.to = '';
-  filterState.minPct = '';
-  filterState.query = '';
+  filterState.discipline      = 'all';
+  filterState.from            = '';
+  filterState.to              = '';
+  filterState.minPct          = '';
+  filterState.query           = '';
+  filterState.includePractice = false;
 
   document.getElementById('history-filter-discipline').value = 'all';
-  document.getElementById('history-filter-from').value = '';
-  document.getElementById('history-filter-to').value = '';
-  document.getElementById('history-filter-min-pct').value = '';
-  document.getElementById('history-filter-query').value = '';
+  document.getElementById('history-filter-from').value      = '';
+  document.getElementById('history-filter-to').value        = '';
+  document.getElementById('history-filter-min-pct').value   = '';
+  document.getElementById('history-filter-query').value     = '';
+  document.getElementById('history-filter-practice').checked = false;
 
   renderHistory();
 }
@@ -151,6 +159,7 @@ function applyFilters(rounds) {
   const toDate = filterState.to ? new Date(`${filterState.to}T23:59:59`).getTime() : null;
 
   return rounds.filter(round => {
+    if (!filterState.includePractice && round.mode === 'station_practice') return false;
     if (filterState.discipline !== 'all' && round.discipline !== filterState.discipline) {
       return false;
     }
@@ -174,9 +183,25 @@ function applyFilters(rounds) {
 }
 
 function buildHistoryItem(round) {
-  const pct  = formatPercent(round.score, round.maxScore);
-  const date = formatDate(round.startedAt);
+  const pct   = formatPercent(round.score, round.maxScore);
+  const date  = formatDate(round.startedAt);
   const color = disciplineDotColor(round.discipline);
+  const isPractice = round.mode === 'station_practice';
+
+  // Build title string
+  let titleText;
+  if (isPractice) {
+    const stations = (round.practiceConfig?.selectedStations || []).join(', ');
+    titleText = `${disciplineLabel(round.discipline)} · Sts. ${stations}`;
+  } else if (round.discipline === 'handicap_trap' && round.yardage) {
+    titleText = `Handicap Trap · ${round.yardage} yd`;
+  } else {
+    titleText = `${disciplineLabel(round.discipline)}${round.mode === 'competition_125' ? ' (125)' : ''}`;
+  }
+
+  const practiceBadge = isPractice
+    ? `<span class="practice-badge">Practice</span>`
+    : '';
 
   const item = document.createElement('div');
   item.className = 'history-item';
@@ -185,7 +210,7 @@ function buildHistoryItem(round) {
     <div class="history-item-header">
       <div class="history-discipline-dot" style="background:${color}"></div>
       <div class="history-item-info">
-        <div class="history-item-title">${round.discipline === 'handicap_trap' && round.yardage ? `Handicap Trap · ${round.yardage} yd` : `${disciplineLabel(round.discipline)}${round.mode === 'competition_125' ? ' (125)' : ''}`}</div>
+        <div class="history-item-title">${titleText}${practiceBadge}</div>
         <div class="history-item-date">${date}</div>
       </div>
       <div>
