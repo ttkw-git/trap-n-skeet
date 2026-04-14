@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python icons/generate-icons.py)",
+      "Bash(python -m http.server 8765)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8080\\\\|:8000\\\\|:8765\\\\|:8766\")"
+    ]
+  }
+}

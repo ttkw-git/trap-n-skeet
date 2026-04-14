@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trap N Skeet">
+  <meta name="theme-color" content="#e67e22">
+  <title>Trap N Skeet</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: HOME
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-home" class="screen">
+    <header class="app-header">
+      <h1 class="app-title">Trap N Skeet</h1>
+      <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙</button>
+    </header>
+
+    <main class="home-main">
+      <p class="home-subtitle">Choose a discipline to start a round</p>
+
+      <div class="discipline-grid">
+        <button class="discipline-btn trap" data-discipline="american_trap">
+          <span class="discipline-icon">🎯</span>
+          <span class="discipline-name">American Trap</span>
+          <span class="discipline-desc">5 stations · 25 shots</span>
+        </button>
+
+        <button class="discipline-btn skeet" data-discipline="skeet">
+          <span class="discipline-icon">🏹</span>
+          <span class="discipline-name">Skeet</span>
+          <span class="discipline-desc">8 stations · 25 shots</span>
+        </button>
+
+        <button class="discipline-btn olympic" data-discipline="olympic_trap">
+          <span class="discipline-icon">🥇</span>
+          <span class="discipline-name">Olympic Trap</span>
+          <span class="discipline-desc">6 stations · 25 or 125 shots</span>
+        </button>
+      </div>
+
+      <!-- Olympic Trap mode selector (shown only when Olympic is selected) -->
+      <div id="olympic-mode-selector" class="mode-selector hidden">
+        <p class="mode-label">Select Mode</p>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="practice_25">Practice (25 shots)</button>
+          <button class="mode-btn" data-mode="competition_125">Competition (125 shots)</button>
+        </div>
+      </div>
+
+      <button id="btn-start-round" class="start-btn hidden">Start Round</button>
+    </main>
+
+    <footer class="home-footer">
+      <button id="btn-history" class="text-btn">📋 View History</button>
+    </footer>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: SETTINGS (modal overlay)
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-settings" class="screen hidden">
+    <header class="app-header">
+      <button class="icon-btn" id="btn-settings-back" aria-label="Back">←</button>
+      <h2 class="screen-title">Settings</h2>
+      <span></span>
+    </header>
+    <main class="settings-main">
+      <div class="settings-group">
+        <label class="settings-label" for="input-name">Shooter Name</label>
+        <input id="input-name" class="settings-input" type="text" placeholder="Your name" maxlength="30">
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">Show Guidance Text</label>
+        <div class="toggle-row">
+          <span class="toggle-desc">Display beginner tips during shooting</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-guidance" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: SHOOTING (active round)
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-shooting" class="screen hidden">
+    <header class="shooting-header">
+      <div class="shooting-meta">
+        <span id="shooting-discipline-label" class="discipline-tag">American Trap</span>
+        <span id="shooting-progress-label" class="progress-label">Shot 1 of 25</span>
+      </div>
+      <div class="score-display">
+        Score: <span id="shooting-score">0</span>/<span id="shooting-max">25</span>
+      </div>
+    </header>
+
+    <div id="shooting-progress-bar" class="progress-bar-wrap">
+      <div id="shooting-progress-fill" class="progress-bar-fill" style="width:0%"></div>
+    </div>
+
+    <main class="shooting-main">
+      <!-- Station diagram -->
+      <div id="station-diagram" class="station-diagram"></div>
+
+      <!-- Current shot info -->
+      <div class="shot-info">
+        <div id="shot-station" class="shot-station">Station 1</div>
+        <div id="shot-type-badge" class="shot-type-badge">Single Target</div>
+        <div id="shot-house" class="shot-house"></div>
+      </div>
+
+      <!-- Guidance text (shown when setting is on) -->
+      <div id="guidance-box" class="guidance-box">
+        <p id="guidance-text" class="guidance-text"></p>
+      </div>
+
+      <!-- Option shot notification -->
+      <div id="option-banner" class="option-banner hidden">
+        ⚡ OPTION SHOT — Reshoot the same target
+      </div>
+
+      <!-- HIT / MISS buttons -->
+      <div class="action-buttons">
+        <button id="btn-hit" class="action-btn hit-btn">
+          <span class="btn-icon">✓</span>
+          <span class="btn-label">HIT</span>
+        </button>
+        <button id="btn-miss" class="action-btn miss-btn">
+          <span class="btn-icon">✗</span>
+          <span class="btn-label">MISS</span>
+        </button>
+      </div>
+
+      <!-- Secondary controls -->
+      <div class="secondary-controls">
+        <button id="btn-undo" class="secondary-btn" disabled>↩ Undo</button>
+        <button id="btn-end-round" class="secondary-btn danger">End Round</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: SUMMARY
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-summary" class="screen hidden">
+    <header class="app-header">
+      <span></span>
+      <h2 class="screen-title">Round Complete</h2>
+      <span></span>
+    </header>
+    <main class="summary-main">
+      <div class="summary-hero">
+        <div id="summary-discipline" class="summary-discipline-label">American Trap</div>
+        <div class="summary-score-wrap">
+          <span id="summary-score" class="summary-score">23</span>
+          <span class="summary-divider">/</span>
+          <span id="summary-max" class="summary-max">25</span>
+        </div>
+        <div id="summary-percent" class="summary-percent">92%</div>
+        <div id="summary-rating" class="summary-rating"></div>
+      </div>
+
+      <div id="summary-breakdown" class="summary-breakdown"></div>
+
+      <div class="summary-actions">
+        <button id="btn-shoot-again" class="start-btn">Shoot Again</button>
+        <button id="btn-go-history" class="text-btn">View History</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: HISTORY
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-history" class="screen hidden">
+    <header class="app-header">
+      <button class="icon-btn" id="btn-history-back" aria-label="Back">←</button>
+      <h2 class="screen-title">History</h2>
+      <span></span>
+    </header>
+    <main class="history-main">
+      <div id="history-stats" class="history-stats"></div>
+      <div id="history-list" class="history-list"></div>
+      <div id="history-empty" class="history-empty hidden">
+        <p>No rounds recorded yet.</p>
+        <p>Start a round to see your history here.</p>
+      </div>
+      <button id="btn-clear-history" class="danger-btn hidden">🗑 Clear All History</button>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       CONFIRM DIALOG (shared)
+  ═══════════════════════════════════════════════════ -->
+  <div id="confirm-overlay" class="confirm-overlay hidden">
+    <div class="confirm-dialog">
+      <p id="confirm-message" class="confirm-message">Are you sure?</p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel" class="secondary-btn">Cancel</button>
+        <button id="confirm-ok" class="action-btn miss-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

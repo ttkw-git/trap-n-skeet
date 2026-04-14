@@ -1,0 +1,104 @@
+/* ═══════════════════════════════════════════════
+   TRAP N SKEET — Theme Variables
+   Dark theme, high contrast for outdoor use
+═══════════════════════════════════════════════ */
+
+:root {
+  /* Backgrounds */
+  --bg-primary:   #141414;
+  --bg-surface:   #1e1e1e;
+  --bg-card:      #252525;
+  --bg-elevated:  #2e2e2e;
+
+  /* Text */
+  --text-primary:   #f2f2f2;
+  --text-secondary: #a0a0a0;
+  --text-muted:     #606060;
+
+  /* Discipline accent colors */
+  --accent-trap:    #e67e22;  /* orange */
+  --accent-skeet:   #2980b9;  /* blue */
+  --accent-olympic: #8e44ad;  /* purple */
+  --accent-current: #e67e22;  /* updated dynamically by JS */
+
+  /* Action colors */
+  --hit-color:        #27ae60;
+  --hit-color-dark:   #1e8449;
+  --hit-color-glow:   rgba(39, 174, 96, 0.25);
+  --miss-color:       #c0392b;
+  --miss-color-dark:  #a93226;
+  --miss-color-glow:  rgba(192, 57, 43, 0.25);
+
+  /* UI */
+  --border-color:  #333333;
+  --radius-sm:     8px;
+  --radius-md:     12px;
+  --radius-lg:     16px;
+  --radius-full:   999px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs:  clamp(11px, 2.5vw, 13px);
+  --font-size-sm:  clamp(13px, 3vw,   15px);
+  --font-size-md:  clamp(15px, 3.5vw, 17px);
+  --font-size-lg:  clamp(18px, 4vw,   22px);
+  --font-size-xl:  clamp(24px, 6vw,   32px);
+  --font-size-2xl: clamp(36px, 9vw,   52px);
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+
+  /* Transitions */
+  --transition-fast: 120ms ease;
+  --transition-mid:  220ms ease;
+}
+
+/* ── Reset ─────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;  /* prevent scroll bounce on iOS */
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;  /* prevents 300ms delay on iOS */
+}
+
+input {
+  font-family: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
