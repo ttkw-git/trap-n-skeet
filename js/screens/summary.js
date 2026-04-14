@@ -19,7 +19,10 @@ export function onEnter({ round, engine }) {
   const { discipline, score, maxScore } = round;
   const pct = formatPercent(score, maxScore);
 
-  document.getElementById('summary-discipline').textContent = disciplineLabel(discipline);
+  const disciplineDisplay = discipline === 'handicap_trap' && round.yardage
+    ? `Handicap Trap · ${round.yardage} yd`
+    : disciplineLabel(discipline);
+  document.getElementById('summary-discipline').textContent = disciplineDisplay;
   document.getElementById('summary-score').textContent      = score;
   document.getElementById('summary-max').textContent        = maxScore;
   document.getElementById('summary-percent').textContent    = pct;

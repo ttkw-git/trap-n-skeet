@@ -76,6 +76,12 @@
           <span class="discipline-name">Olympic Trap</span>
           <span class="discipline-desc">6 stations · 25 or 125 shots</span>
         </button>
+
+        <button class="discipline-btn trap" data-discipline="handicap_trap">
+          <span class="discipline-icon">📐</span>
+          <span class="discipline-name">Handicap Trap</span>
+          <span class="discipline-desc">5 stations · 25 shots · 16–27 yd</span>
+        </button>
       </div>
 
       <!-- Olympic Trap mode selector (shown only when Olympic is selected) -->
@@ -84,6 +90,16 @@
         <div class="mode-toggle">
           <button class="mode-btn active" data-mode="practice_25">Practice (25 shots)</button>
           <button class="mode-btn" data-mode="competition_125">Competition (125 shots)</button>
+        </div>
+      </div>
+
+      <!-- Handicap Trap yardage selector (shown only when Handicap Trap is selected) -->
+      <div id="handicap-yardage-selector" class="mode-selector hidden">
+        <p class="mode-label">Handicap Yardage</p>
+        <div class="yardage-stepper">
+          <button id="yardage-dec" class="yardage-step-btn" aria-label="Decrease yardage">−</button>
+          <span id="yardage-value" class="yardage-display">20 yd</span>
+          <button id="yardage-inc" class="yardage-step-btn" aria-label="Increase yardage">+</button>
         </div>
       </div>
 
@@ -260,6 +276,7 @@
               <option value="american_trap">American Trap</option>
               <option value="skeet">Skeet</option>
               <option value="olympic_trap">Olympic Trap</option>
+              <option value="handicap_trap">Handicap Trap</option>
             </select>
           </label>
           <label class="history-filter-field">
@@ -313,6 +330,7 @@
             <option value="american_trap">American Trap</option>
             <option value="skeet">Skeet</option>
             <option value="olympic_trap">Olympic Trap</option>
+            <option value="handicap_trap">Handicap Trap</option>
           </select>
         </label>
         <label class="analytics-field">
