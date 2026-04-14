@@ -207,3 +207,22 @@ async function pushAllToCloud() {
     await setDoc(ref, round);
   }
 }
+
+/**
+ * Delete all round documents from Firestore for the current user.
+ * Called when the user clears history, so cloud data can't restore after reload.
+ */
+export async function clearAllRoundsFromCloud() {
+  if (!_currentUser) return;
+  try {
+    const snapshot = await getDocs(
+      collection(db, 'users', _currentUser.uid, 'rounds')
+    );
+    if (snapshot.empty) return;
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(docSnap => batch.delete(docSnap.ref));
+    await batch.commit();
+  } catch (err) {
+    console.warn('Cloud clear failed (local data already cleared):', err.message);
+  }
+}

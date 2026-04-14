@@ -5,6 +5,7 @@
 import { loadAllRounds, clearAllRounds } from '../storage.js';
 import { disciplineLabel, disciplineDotColor, formatDate, formatPercent, confirm } from '../utils.js';
 import { downloadRoundsAsCSV, downloadRoundsAsJSON } from '../export.js';
+import { clearAllRoundsFromCloud } from '../sync.js';
 
 let onBackCallback = null;
 let filteredRounds = [];
@@ -239,5 +240,6 @@ async function handleClear() {
   const ok = await confirm('Delete all history? This cannot be undone.');
   if (!ok) return;
   clearAllRounds();
+  await clearAllRoundsFromCloud();
   renderHistory();
 }
