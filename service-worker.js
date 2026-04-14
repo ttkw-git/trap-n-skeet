@@ -3,7 +3,7 @@
 // Bump CACHE_NAME version when deploying updates
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'trapnskeet-v2';
+const CACHE_NAME = 'trapnskeet-v3';
 
 const ASSETS = [
   './index.html',
@@ -22,6 +22,7 @@ const ASSETS = [
   './js/screens/shooting.js',
   './js/screens/summary.js',
   './js/screens/history.js',
+  './js/screens/analytics.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
