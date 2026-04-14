@@ -144,7 +144,7 @@
   transition: background var(--transition-mid), color var(--transition-mid);
 }
 .mode-btn.active {
-  background: var(--accent-olympic);
+  background: var(--accent-current);
   color: #fff;
 }
 
