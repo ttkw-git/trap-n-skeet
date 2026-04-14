@@ -11,9 +11,10 @@ A Progressive Web App (PWA) for tracking shotgun shooting scores across three co
 - **Hit / Miss recording** with haptic vibration feedback (50 ms on hit, pulse pattern on miss)
 - **Undo** — step back through any shot in the current round
 - **Post-round summary** — score, percentage, performance rating, and a station-by-station breakdown
-- **History & stats** — full round history with best score and average per discipline
+- **History & stats** — full round history filterable by discipline, date range, minimum score %, and text search; best score and average per discipline
+- **Analytics** — score trend chart with moving average and personal-best lines, plus station-by-station hit % bars; filterable by discipline and time window (30 / 60 / 90 days)
 - **Data export** — download filtered history as CSV or JSON for analysis/backups
-- **Google sign-in + cloud sync** — Firebase Firestore mirrors rounds across all your devices
+- **Google sign-in + cloud sync** — Firebase Firestore mirrors rounds across all your devices; manual "Sync Now" button plus auto-sync on reconnect, every 5 minutes, and when the tab regains focus
 - **Offline-first** — Service Worker caches the app so it works without a network connection
 - **PWA installable** — add to Home Screen on iOS/Android or install via desktop browser
 
@@ -107,7 +108,8 @@ trap-n-skeet/
 │       ├── home.js         # Home screen, discipline/mode selection, settings
 │       ├── shooting.js     # Active round UI — hit/miss buttons, undo, exit
 │       ├── summary.js      # Post-round results and station breakdown
-│       └── history.js      # Round history list and per-discipline stats
+│       ├── history.js      # Round history list, filters, stats, and export
+│       └── analytics.js    # Trend chart, moving average, station hit % bars
 │
 └── icons/
     ├── icon.svg            # Source vector icon
