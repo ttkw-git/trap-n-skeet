@@ -7,7 +7,7 @@ import { initShooting, onEnter as shootingEnter } from './screens/shooting.js';
 import { initSummary,  onEnter as summaryEnter  } from './screens/summary.js';
 import { initHistory,  onEnter as historyEnter  } from './screens/history.js';
 import { initAnalytics, onEnter as analyticsEnter } from './screens/analytics.js';
-import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, onSyncMetaChange, getCurrentUser, getLastSyncedAt, getSyncStatus }
+import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, onSyncMetaChange, getCurrentUser, getLastSyncedAt, getSyncStatus, pullFromCloud }
   from './sync.js';
 
 // ── Register Service Worker ────────────────────
@@ -188,6 +188,11 @@ document.getElementById('btn-sign-out').addEventListener('click', async () => {
   await signOutUser();
   navigate('home');
 });
+document.getElementById('btn-sync-now').addEventListener('click', async () => {
+  if (!getCurrentUser()) return;
+  await pullFromCloud();
+  if (currentScreen === 'history') historyEnter();
+});
 document.getElementById('btn-settings-signin').addEventListener('click', async () => {
   try { await signInGoogle(); } catch (_) {}
 });
@@ -204,10 +209,14 @@ onSyncMetaChange(({ status, lastSyncedAt }) => {
   updateSettingsSyncStatus(status, lastSyncedAt);
 });
 
-window.addEventListener('online', () => {
+window.addEventListener('online', async () => {
   const status = getSyncStatus();
   updateSyncIndicator(status);
   updateSettingsSyncStatus(status, getLastSyncedAt());
+  if (getCurrentUser()) {
+    await pullFromCloud();
+    if (currentScreen === 'history') historyEnter();
+  }
 });
 window.addEventListener('offline', () => {
   const status = getSyncStatus();
@@ -235,6 +244,22 @@ async function boot() {
     navigate('signin');
     localStorage.setItem('trapnskeet_seen_auth', '1');
   }
+
+  // Auto-sync: pull from cloud every 5 minutes when signed in and online
+  setInterval(async () => {
+    if (getCurrentUser() && navigator.onLine) {
+      await pullFromCloud();
+      if (currentScreen === 'history') historyEnter();
+    }
+  }, 5 * 60 * 1000);
+
+  // Auto-sync: pull from cloud when tab becomes visible again
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && getCurrentUser() && navigator.onLine) {
+      await pullFromCloud();
+      if (currentScreen === 'history') historyEnter();
+    }
+  });
 }
 
 boot();
