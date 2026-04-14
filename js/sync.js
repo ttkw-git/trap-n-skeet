@@ -24,6 +24,10 @@ let _currentUser   = null;
 let _authListeners = [];  // callbacks: (user) => void
 let _syncStatus    = 'idle'; // 'idle' | 'syncing' | 'synced' | 'error'
 let _statusListeners = [];
+let _metaListeners = [];
+
+const LAST_SYNC_KEY = 'trapnskeet_last_synced_at';
+let _lastSyncedAt = localStorage.getItem(LAST_SYNC_KEY) || null;
 
 // ── Auth listeners ─────────────────────────────
 
@@ -40,9 +44,20 @@ export function onSyncStatusChange(callback) {
   callback(_syncStatus);
 }
 
+/** Register a callback for sync status + timestamp metadata updates. */
+export function onSyncMetaChange(callback) {
+  _metaListeners.push(callback);
+  callback({ status: _syncStatus, lastSyncedAt: _lastSyncedAt });
+}
+
 function setSyncStatus(status) {
   _syncStatus = status;
+  if (status === 'synced') {
+    _lastSyncedAt = new Date().toISOString();
+    localStorage.setItem(LAST_SYNC_KEY, _lastSyncedAt);
+  }
   _statusListeners.forEach(fn => fn(status));
+  _metaListeners.forEach(fn => fn({ status, lastSyncedAt: _lastSyncedAt }));
 }
 
 // ── Bootstrap ──────────────────────────────────
@@ -99,6 +114,10 @@ export function getCurrentUser() {
 
 export function getSyncStatus() {
   return _syncStatus;
+}
+
+export function getLastSyncedAt() {
+  return _lastSyncedAt;
 }
 
 // ── Cloud write ────────────────────────────────

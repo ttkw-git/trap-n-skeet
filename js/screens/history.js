@@ -4,13 +4,32 @@
 
 import { loadAllRounds, clearAllRounds } from '../storage.js';
 import { disciplineLabel, disciplineDotColor, formatDate, formatPercent, confirm } from '../utils.js';
+import { downloadRoundsAsCSV, downloadRoundsAsJSON } from '../export.js';
 
 let onBackCallback = null;
+let filteredRounds = [];
+
+const filterState = {
+  discipline: 'all',
+  from: '',
+  to: '',
+  minPct: '',
+  query: '',
+};
 
 export function initHistory({ onBack }) {
   onBackCallback = onBack;
   document.getElementById('btn-history-back').addEventListener('click', onBackCallback);
   document.getElementById('btn-clear-history').addEventListener('click', handleClear);
+  document.getElementById('btn-history-clear-filters').addEventListener('click', resetFilters);
+  document.getElementById('btn-export-csv').addEventListener('click', () => {
+    if (filteredRounds.length > 0) downloadRoundsAsCSV(filteredRounds);
+  });
+  document.getElementById('btn-export-json').addEventListener('click', () => {
+    if (filteredRounds.length > 0) downloadRoundsAsJSON(filteredRounds);
+  });
+
+  bindFilterInputs();
 }
 
 export function onEnter() {
@@ -19,27 +38,42 @@ export function onEnter() {
 
 function renderHistory() {
   const all    = loadAllRounds().filter(r => r.completedAt);
+  filteredRounds = applyFilters(all);
+
   const list   = document.getElementById('history-list');
   const empty  = document.getElementById('history-empty');
   const stats  = document.getElementById('history-stats');
   const clearBtn = document.getElementById('btn-clear-history');
+  const exportCsvBtn = document.getElementById('btn-export-csv');
+  const exportJsonBtn = document.getElementById('btn-export-json');
 
   list.innerHTML  = '';
   stats.innerHTML = '';
 
   if (all.length === 0) {
     empty.classList.remove('hidden');
+    empty.innerHTML = '<p>No rounds recorded yet.</p><p>Start a round to see your history here.</p>';
     clearBtn.classList.add('hidden');
+    exportCsvBtn.disabled = true;
+    exportJsonBtn.disabled = true;
     return;
   }
 
   empty.classList.add('hidden');
   clearBtn.classList.remove('hidden');
+  exportCsvBtn.disabled = filteredRounds.length === 0;
+  exportJsonBtn.disabled = filteredRounds.length === 0;
+
+  if (filteredRounds.length === 0) {
+    empty.classList.remove('hidden');
+    empty.innerHTML = '<p>No rounds match your filters.</p><p>Reset filters to see all rounds.</p>';
+    return;
+  }
 
   // ── Stats chips ──────────────────────────────
   const disciplines = ['american_trap', 'skeet', 'olympic_trap'];
   for (const disc of disciplines) {
-    const rounds = all.filter(r => r.discipline === disc && r.maxScore <= 25);
+    const rounds = filteredRounds.filter(r => r.discipline === disc && r.maxScore <= 25);
     if (rounds.length === 0) continue;
 
     const avg = rounds.reduce((sum, r) => sum + r.score, 0) / rounds.length;
@@ -56,12 +90,86 @@ function renderHistory() {
   }
 
   // ── Round list (most recent first) ───────────
-  const sorted = [...all].sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+  const sorted = [...filteredRounds].sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
 
   for (const round of sorted) {
     const item = buildHistoryItem(round);
     list.appendChild(item);
   }
+}
+
+function bindFilterInputs() {
+  const discipline = document.getElementById('history-filter-discipline');
+  const from = document.getElementById('history-filter-from');
+  const to = document.getElementById('history-filter-to');
+  const minPct = document.getElementById('history-filter-min-pct');
+  const query = document.getElementById('history-filter-query');
+
+  discipline.addEventListener('change', () => {
+    filterState.discipline = discipline.value;
+    renderHistory();
+  });
+  from.addEventListener('change', () => {
+    filterState.from = from.value;
+    renderHistory();
+  });
+  to.addEventListener('change', () => {
+    filterState.to = to.value;
+    renderHistory();
+  });
+  minPct.addEventListener('input', () => {
+    filterState.minPct = minPct.value;
+    renderHistory();
+  });
+  query.addEventListener('input', () => {
+    filterState.query = query.value.trim().toLowerCase();
+    renderHistory();
+  });
+}
+
+function resetFilters() {
+  filterState.discipline = 'all';
+  filterState.from = '';
+  filterState.to = '';
+  filterState.minPct = '';
+  filterState.query = '';
+
+  document.getElementById('history-filter-discipline').value = 'all';
+  document.getElementById('history-filter-from').value = '';
+  document.getElementById('history-filter-to').value = '';
+  document.getElementById('history-filter-min-pct').value = '';
+  document.getElementById('history-filter-query').value = '';
+
+  renderHistory();
+}
+
+function applyFilters(rounds) {
+  const minPct = Number(filterState.minPct);
+  const hasMinPct = Number.isFinite(minPct) && filterState.minPct !== '';
+  const fromDate = filterState.from ? new Date(`${filterState.from}T00:00:00`).getTime() : null;
+  const toDate = filterState.to ? new Date(`${filterState.to}T23:59:59`).getTime() : null;
+
+  return rounds.filter(round => {
+    if (filterState.discipline !== 'all' && round.discipline !== filterState.discipline) {
+      return false;
+    }
+
+    const startedAt = new Date(round.startedAt).getTime();
+    if (fromDate && startedAt < fromDate) return false;
+    if (toDate && startedAt > toDate) return false;
+
+    if (hasMinPct) {
+      const pct = round.maxScore > 0 ? Math.round((round.score / round.maxScore) * 100) : 0;
+      if (pct < minPct) return false;
+    }
+
+    if (filterState.query) {
+      const haystack = `${disciplineLabel(round.discipline)} ${round.mode}`.toLowerCase();
+      if (!haystack.includes(filterState.query)) return false;
+    }
+
+    return true;
+  });
 }
 
 function buildHistoryItem(round) {

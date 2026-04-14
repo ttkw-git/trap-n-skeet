@@ -50,6 +50,7 @@
       <h1 class="app-title">Trap N Skeet</h1>
       <div class="header-right">
         <div id="sync-indicator" class="sync-indicator hidden" title="Sync status"></div>
+        <div id="sync-indicator-text" class="sync-indicator-text hidden"></div>
         <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙</button>
       </div>
     </header>
@@ -248,6 +249,40 @@
       <span></span>
     </header>
     <main class="history-main">
+      <div class="history-toolbar">
+        <div class="history-filters-grid">
+          <label class="history-filter-field">
+            <span>Discipline</span>
+            <select id="history-filter-discipline" class="history-input">
+              <option value="all">All</option>
+              <option value="american_trap">American Trap</option>
+              <option value="skeet">Skeet</option>
+              <option value="olympic_trap">Olympic Trap</option>
+            </select>
+          </label>
+          <label class="history-filter-field">
+            <span>From</span>
+            <input id="history-filter-from" class="history-input" type="date">
+          </label>
+          <label class="history-filter-field">
+            <span>To</span>
+            <input id="history-filter-to" class="history-input" type="date">
+          </label>
+          <label class="history-filter-field">
+            <span>Min %</span>
+            <input id="history-filter-min-pct" class="history-input" type="number" min="0" max="100" step="1" placeholder="0">
+          </label>
+          <label class="history-filter-field history-filter-wide">
+            <span>Search</span>
+            <input id="history-filter-query" class="history-input" type="text" maxlength="40" placeholder="Discipline or mode">
+          </label>
+        </div>
+        <div class="history-toolbar-actions">
+          <button id="btn-history-clear-filters" class="secondary-btn">Reset Filters</button>
+          <button id="btn-export-csv" class="secondary-btn">Export CSV</button>
+          <button id="btn-export-json" class="secondary-btn">Export JSON</button>
+        </div>
+      </div>
       <div id="history-stats" class="history-stats"></div>
       <div id="history-list" class="history-list"></div>
       <div id="history-empty" class="history-empty hidden">

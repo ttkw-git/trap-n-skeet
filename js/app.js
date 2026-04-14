@@ -6,7 +6,7 @@ import { initHome,     onEnter as homeEnter     } from './screens/home.js';
 import { initShooting, onEnter as shootingEnter } from './screens/shooting.js';
 import { initSummary,  onEnter as summaryEnter  } from './screens/summary.js';
 import { initHistory,  onEnter as historyEnter  } from './screens/history.js';
-import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, getCurrentUser }
+import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, onSyncMetaChange, getCurrentUser, getLastSyncedAt, getSyncStatus }
   from './sync.js';
 
 // ── Register Service Worker ────────────────────
@@ -70,14 +70,46 @@ function initSignInScreen() {
 
 function updateSyncIndicator(status) {
   const el = document.getElementById('sync-indicator');
+  const textEl = document.getElementById('sync-indicator-text');
+  const user = getCurrentUser();
+
   el.className = 'sync-indicator';
-  if (status === 'idle') {
+
+  if (!user || status === 'idle') {
     el.classList.add('hidden');
+    textEl.classList.add('hidden');
     return;
   }
+
   el.classList.remove('hidden');
   el.classList.add(status);
-  el.title = { syncing: 'Syncing…', synced: 'Synced ✓', error: 'Sync error' }[status] || '';
+
+  const lastSyncedAt = getLastSyncedAt();
+  const statusLabel = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync error' }[status] || 'Sync';
+  const detail = formatSyncDetail(lastSyncedAt);
+
+  el.title = `${statusLabel}${detail ? ` (${detail})` : ''}`;
+  textEl.textContent = `${statusLabel}${detail ? ` · ${detail}` : ''}`;
+  textEl.classList.remove('hidden');
+}
+
+function formatSyncDetail(lastSyncedAt) {
+  if (!navigator.onLine) return 'Offline';
+  if (!lastSyncedAt) return 'Not yet';
+  return `Last ${new Date(lastSyncedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+}
+
+function updateSettingsSyncStatus(status, lastSyncedAt) {
+  const el = document.getElementById('settings-sync-status');
+  const user = getCurrentUser();
+  if (!user) {
+    el.textContent = '';
+    return;
+  }
+
+  const label = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync error', idle: 'Idle' }[status] || 'Sync';
+  const detail = formatSyncDetail(lastSyncedAt);
+  el.textContent = detail ? `${label} · ${detail}` : label;
 }
 
 // ── Auth state → UI ────────────────────────────
@@ -87,6 +119,7 @@ function updateAuthUI(user) {
   const indicator = document.getElementById('sync-indicator');
   if (!user) {
     indicator.classList.add('hidden');
+    document.getElementById('sync-indicator-text').classList.add('hidden');
   }
 
   // Settings screen account section
@@ -159,6 +192,20 @@ window.addEventListener('trapnskeet:synced', () => {
 // ── Subscribe to auth + sync state ────────────
 onUserChange(updateAuthUI);
 onSyncStatusChange(updateSyncIndicator);
+onSyncMetaChange(({ status, lastSyncedAt }) => {
+  updateSettingsSyncStatus(status, lastSyncedAt);
+});
+
+window.addEventListener('online', () => {
+  const status = getSyncStatus();
+  updateSyncIndicator(status);
+  updateSettingsSyncStatus(status, getLastSyncedAt());
+});
+window.addEventListener('offline', () => {
+  const status = getSyncStatus();
+  updateSyncIndicator(status);
+  updateSettingsSyncStatus(status, getLastSyncedAt());
+});
 
 // ── Boot ───────────────────────────────────────
 async function boot() {
