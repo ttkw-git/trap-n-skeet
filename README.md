@@ -12,6 +12,7 @@ A Progressive Web App (PWA) for tracking shotgun shooting scores across three co
 - **Undo** — step back through any shot in the current round
 - **Post-round summary** — score, percentage, performance rating, and a station-by-station breakdown
 - **History & stats** — full round history with best score and average per discipline
+- **Data export** — download filtered history as CSV or JSON for analysis/backups
 - **Google sign-in + cloud sync** — Firebase Firestore mirrors rounds across all your devices
 - **Offline-first** — Service Worker caches the app so it works without a network connection
 - **PWA installable** — add to Home Screen on iOS/Android or install via desktop browser
@@ -95,6 +96,7 @@ trap-n-skeet/
 │   ├── storage.js          # localStorage read/write helpers
 │   ├── firebase.js         # Firebase SDK initialisation
 │   ├── utils.js            # Formatting, vibration, confirm dialog
+│   ├── export.js           # CSV / JSON export helpers for round history
 │   │
 │   ├── disciplines/
 │   │   ├── american-trap.js    # AmericanTrapEngine — 5×5 shot sequence
