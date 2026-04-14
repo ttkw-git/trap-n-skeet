@@ -85,6 +85,7 @@
         <div class="mode-toggle">
           <button class="mode-btn active" data-set-discipline="american_trap">Standard</button>
           <button class="mode-btn" data-set-discipline="handicap_trap">Handicap</button>
+          <button class="mode-btn" data-show-practice="american_trap">Station Practice</button>
         </div>
       </div>
 
@@ -98,12 +99,52 @@
         </div>
       </div>
 
+      <!-- Skeet mode selector (shown only when Skeet is selected) -->
+      <div id="skeet-mode-selector" class="mode-selector hidden">
+        <p class="mode-label">Select Mode</p>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="practice_25">Competition (25 shots)</button>
+          <button class="mode-btn" data-show-practice="skeet">Station Practice</button>
+        </div>
+      </div>
+
       <!-- Olympic Trap mode selector (shown only when Olympic Trap is selected) -->
       <div id="olympic-mode-selector" class="mode-selector hidden">
         <p class="mode-label">Select Mode</p>
         <div class="mode-toggle">
           <button class="mode-btn active" data-mode="practice_25">Practice (25 shots)</button>
           <button class="mode-btn" data-mode="competition_125">Competition (125 shots)</button>
+          <button class="mode-btn" data-show-practice="olympic_trap">Station Practice</button>
+        </div>
+      </div>
+
+      <!-- Station Practice selector (shown when Station Practice is chosen for any discipline) -->
+      <div id="station-practice-selector" class="mode-selector hidden">
+        <div class="practice-selector-header">
+          <p class="mode-label">Select Stations</p>
+          <div class="practice-select-all-row">
+            <button id="practice-select-all" class="text-btn practice-text-btn">Select All</button>
+            <span class="practice-select-divider">·</span>
+            <button id="practice-deselect-all" class="text-btn practice-text-btn">None</button>
+          </div>
+        </div>
+        <!-- Populated dynamically by home.js based on selected discipline -->
+        <div id="practice-station-list" class="practice-station-list"></div>
+
+        <div class="practice-shot-count-wrap">
+          <p class="mode-label">Shot Count</p>
+          <div class="practice-shot-presets">
+            <button class="mode-btn practice-preset-btn" data-count="10">10</button>
+            <button class="mode-btn active practice-preset-btn" data-count="25">25</button>
+            <button class="mode-btn practice-preset-btn" data-count="50">50</button>
+            <button class="mode-btn practice-preset-btn" data-count="custom">Custom</button>
+          </div>
+          <input id="practice-custom-count" class="settings-input practice-custom-input hidden"
+            type="number" min="1" max="200" value="25" placeholder="1–200" inputmode="numeric">
+        </div>
+
+        <div id="practice-validation-msg" class="practice-validation hidden">
+          Select at least one station to begin.
         </div>
       </div>
 
@@ -300,6 +341,13 @@
             <span>Search</span>
             <input id="history-filter-query" class="history-input" type="text" maxlength="40" placeholder="Discipline or mode">
           </label>
+          <label class="history-filter-field history-filter-practice-row">
+            <span>Include Practice Rounds</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="history-filter-practice">
+              <span class="toggle-slider"></span>
+            </label>
+          </label>
         </div>
         <div class="history-toolbar-actions">
           <button id="btn-history-clear-filters" class="secondary-btn">Reset Filters</button>
@@ -345,6 +393,13 @@
             <option value="90">Last 90 days</option>
             <option value="all">All time</option>
           </select>
+        </label>
+        <label class="analytics-field analytics-practice-toggle">
+          <span>Include Practice</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="analytics-include-practice">
+            <span class="toggle-slider"></span>
+          </label>
         </label>
       </div>
 

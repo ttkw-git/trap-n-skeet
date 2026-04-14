@@ -142,6 +142,9 @@
   font-weight: 500;
   color: var(--text-secondary);
   transition: background var(--transition-mid), color var(--transition-mid);
+  text-align: center;
+  line-height: 1.2;
+  min-width: 0;  /* allow shrinking below content size in flex context */
 }
 .mode-btn.active {
   background: var(--accent-current);
@@ -1222,4 +1225,173 @@ body[data-discipline="handicap_trap"] {
   .sync-indicator-text {
     display: none;
   }
+}
+
+/* ─────────────────────────────────────────────
+   Station Practice selector
+───────────────────────────────────────────── */
+
+.practice-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.practice-selector-header .mode-label {
+  margin: 0;
+}
+
+.practice-select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.practice-text-btn {
+  font-size: var(--font-size-xs);
+  color: var(--accent-current);
+  padding: 2px 0;
+  line-height: 1;
+}
+
+.practice-select-divider {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* Station list */
+.practice-station-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.practice-station-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--space-xs);
+  border-radius: var(--radius-sm);
+  gap: var(--space-sm);
+  min-height: 38px;
+}
+
+.practice-station-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.practice-station-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-current);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.practice-station-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Skeet house toggles */
+.practice-house-toggles {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.practice-house-btn {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  line-height: 1;
+}
+
+.practice-house-btn.active {
+  background: var(--accent-current);
+  color: #fff;
+  border-color: var(--accent-current);
+}
+
+.practice-house-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Shot count section */
+.practice-shot-count-wrap {
+  margin-top: var(--space-xs);
+}
+
+.practice-shot-presets {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.practice-custom-input {
+  margin-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Validation message */
+.practice-validation {
+  font-size: var(--font-size-xs);
+  color: var(--miss-color, #e74c3c);
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* Practice badge in history */
+.practice-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(142, 68, 173, 0.15);
+  color: #8e44ad;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* History practice toggle row */
+.history-filter-practice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Analytics practice toggle */
+.analytics-practice-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }

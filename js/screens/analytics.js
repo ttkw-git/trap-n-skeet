@@ -7,8 +7,9 @@ import { getTrendPoints, getStationPerformance } from '../storage.js';
 let onBackCallback = null;
 
 const state = {
-  discipline: 'all',
-  window: '30',
+  discipline:      'all',
+  window:          '30',
+  includePractice: false,
 };
 
 export function initAnalytics({ onBack }) {
@@ -23,17 +24,30 @@ export function initAnalytics({ onBack }) {
     state.window = e.target.value;
     renderAnalytics();
   });
+  document.getElementById('analytics-include-practice').addEventListener('change', (e) => {
+    state.includePractice = e.target.checked;
+    renderAnalytics();
+  });
 }
 
 export function onEnter() {
   document.getElementById('analytics-discipline').value = state.discipline;
   document.getElementById('analytics-window').value = state.window;
+  document.getElementById('analytics-include-practice').checked = state.includePractice;
   renderAnalytics();
 }
 
 function renderAnalytics() {
-  const trend = getTrendPoints({ discipline: state.discipline, days: state.window });
-  const stationPerf = getStationPerformance({ discipline: state.discipline, days: state.window });
+  const trend = getTrendPoints({
+    discipline:      state.discipline,
+    days:            state.window,
+    includePractice: state.includePractice,
+  });
+  const stationPerf = getStationPerformance({
+    discipline:      state.discipline,
+    days:            state.window,
+    includePractice: state.includePractice,
+  });
 
   renderTrend(trend);
   renderStationBars(stationPerf);
