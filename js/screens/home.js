@@ -67,6 +67,8 @@ export function onEnter() {
   document.getElementById('olympic-mode-selector').classList.add('hidden');
   document.getElementById('handicap-yardage-selector').classList.add('hidden');
   document.getElementById('yardage-value').textContent = '20 yd';
+  document.getElementById('yardage-dec').disabled = false;
+  document.getElementById('yardage-inc').disabled = false;
   document.getElementById('btn-start-round').classList.add('hidden');
 
   // Load saved settings
