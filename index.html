@@ -92,6 +92,7 @@
 
     <footer class="home-footer">
       <button id="btn-history" class="text-btn">📋 View History</button>
+      <button id="btn-analytics" class="text-btn">📈 View Analytics</button>
     </footer>
   </div>
 
@@ -290,6 +291,50 @@
         <p>Start a round to see your history here.</p>
       </div>
       <button id="btn-clear-history" class="danger-btn hidden">🗑 Clear All History</button>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: ANALYTICS
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-analytics" class="screen hidden">
+    <header class="app-header">
+      <button class="icon-btn" id="btn-analytics-back" aria-label="Back">←</button>
+      <h2 class="screen-title">Analytics</h2>
+      <span></span>
+    </header>
+    <main class="analytics-main">
+      <div class="analytics-toolbar">
+        <label class="analytics-field">
+          <span>Discipline</span>
+          <select id="analytics-discipline" class="history-input">
+            <option value="all">All</option>
+            <option value="american_trap">American Trap</option>
+            <option value="skeet">Skeet</option>
+            <option value="olympic_trap">Olympic Trap</option>
+          </select>
+        </label>
+        <label class="analytics-field">
+          <span>Window</span>
+          <select id="analytics-window" class="history-input">
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="analytics-card">
+        <h3>Score Trend</h3>
+        <div id="analytics-trend-empty" class="analytics-empty hidden">Not enough rounds to render a trend yet.</div>
+        <svg id="analytics-trend-chart" class="analytics-trend-chart" viewBox="0 0 320 160" preserveAspectRatio="none"></svg>
+      </section>
+
+      <section class="analytics-card">
+        <h3>Station Performance</h3>
+        <div id="analytics-station-empty" class="analytics-empty hidden">No station data for current filters.</div>
+        <div id="analytics-station-bars" class="analytics-station-bars"></div>
+      </section>
     </main>
   </div>
 

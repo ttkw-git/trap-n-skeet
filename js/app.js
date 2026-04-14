@@ -6,6 +6,7 @@ import { initHome,     onEnter as homeEnter     } from './screens/home.js';
 import { initShooting, onEnter as shootingEnter } from './screens/shooting.js';
 import { initSummary,  onEnter as summaryEnter  } from './screens/summary.js';
 import { initHistory,  onEnter as historyEnter  } from './screens/history.js';
+import { initAnalytics, onEnter as analyticsEnter } from './screens/analytics.js';
 import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, onSyncMetaChange, getCurrentUser, getLastSyncedAt, getSyncStatus }
   from './sync.js';
 
@@ -22,6 +23,7 @@ const screenEls = {
   shooting: document.getElementById('screen-shooting'),
   summary:  document.getElementById('screen-summary'),
   history:  document.getElementById('screen-history'),
+  analytics: document.getElementById('screen-analytics'),
 };
 
 const onEnterFns = {
@@ -31,6 +33,7 @@ const onEnterFns = {
   shooting: shootingEnter,
   summary:  summaryEnter,
   history:  historyEnter,
+  analytics: analyticsEnter,
 };
 
 let currentScreen = null;
@@ -155,6 +158,7 @@ function updateAuthUI(user) {
 initHome({
   onStart:   (params) => navigate('shooting', params),
   onHistory: () => navigate('history'),
+  onAnalytics: () => navigate('analytics'),
 });
 
 initShooting({
@@ -167,6 +171,10 @@ initSummary({
 });
 
 initHistory({
+  onBack: () => navigate('home'),
+});
+
+initAnalytics({
   onBack: () => navigate('home'),
 });
 

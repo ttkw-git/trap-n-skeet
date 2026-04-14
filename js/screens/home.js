@@ -8,10 +8,12 @@ let selectedDiscipline = null;
 let selectedMode       = 'practice_25';
 let onStartCallback    = null;
 let onHistoryCallback  = null;
+let onAnalyticsCallback = null;
 
-export function initHome({ onStart, onHistory }) {
+export function initHome({ onStart, onHistory, onAnalytics }) {
   onStartCallback   = onStart;
   onHistoryCallback = onHistory;
+  onAnalyticsCallback = onAnalytics;
 
   // Discipline buttons
   document.querySelectorAll('.discipline-btn').forEach(btn => {
@@ -32,6 +34,7 @@ export function initHome({ onStart, onHistory }) {
 
   // History button
   document.getElementById('btn-history').addEventListener('click', onHistoryCallback);
+  document.getElementById('btn-analytics').addEventListener('click', onAnalyticsCallback);
 
   // Settings button
   document.getElementById('btn-settings').addEventListener('click', () => {
