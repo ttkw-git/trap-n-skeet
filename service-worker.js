@@ -3,7 +3,7 @@
 // Bump CACHE_NAME version when deploying updates
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'trapnskeet-v2';
+const CACHE_NAME = 'trapnskeet-v8';
 
 const ASSETS = [
   './index.html',
@@ -18,10 +18,13 @@ const ASSETS = [
   './js/disciplines/american-trap.js',
   './js/disciplines/skeet.js',
   './js/disciplines/olympic-trap.js',
+  './js/disciplines/station-practice.js',
   './js/screens/home.js',
   './js/screens/shooting.js',
   './js/screens/summary.js',
   './js/screens/history.js',
+  './js/screens/analytics.js',
+  './js/share.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];

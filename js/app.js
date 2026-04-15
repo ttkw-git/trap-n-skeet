@@ -6,7 +6,8 @@ import { initHome,     onEnter as homeEnter     } from './screens/home.js';
 import { initShooting, onEnter as shootingEnter } from './screens/shooting.js';
 import { initSummary,  onEnter as summaryEnter  } from './screens/summary.js';
 import { initHistory,  onEnter as historyEnter  } from './screens/history.js';
-import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, getCurrentUser }
+import { initAnalytics, onEnter as analyticsEnter } from './screens/analytics.js';
+import { initSync, signInGoogle, signOutUser, onUserChange, onSyncStatusChange, onSyncMetaChange, getCurrentUser, getLastSyncedAt, getSyncStatus, pullFromCloud }
   from './sync.js';
 
 // ── Register Service Worker ────────────────────
@@ -22,6 +23,7 @@ const screenEls = {
   shooting: document.getElementById('screen-shooting'),
   summary:  document.getElementById('screen-summary'),
   history:  document.getElementById('screen-history'),
+  analytics: document.getElementById('screen-analytics'),
 };
 
 const onEnterFns = {
@@ -31,6 +33,7 @@ const onEnterFns = {
   shooting: shootingEnter,
   summary:  summaryEnter,
   history:  historyEnter,
+  analytics: analyticsEnter,
 };
 
 let currentScreen = null;
@@ -70,14 +73,46 @@ function initSignInScreen() {
 
 function updateSyncIndicator(status) {
   const el = document.getElementById('sync-indicator');
+  const textEl = document.getElementById('sync-indicator-text');
+  const user = getCurrentUser();
+
   el.className = 'sync-indicator';
-  if (status === 'idle') {
+
+  if (!user || status === 'idle') {
     el.classList.add('hidden');
+    textEl.classList.add('hidden');
     return;
   }
+
   el.classList.remove('hidden');
   el.classList.add(status);
-  el.title = { syncing: 'Syncing…', synced: 'Synced ✓', error: 'Sync error' }[status] || '';
+
+  const lastSyncedAt = getLastSyncedAt();
+  const statusLabel = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync error' }[status] || 'Sync';
+  const detail = formatSyncDetail(lastSyncedAt);
+
+  el.title = `${statusLabel}${detail ? ` (${detail})` : ''}`;
+  textEl.textContent = `${statusLabel}${detail ? ` · ${detail}` : ''}`;
+  textEl.classList.remove('hidden');
+}
+
+function formatSyncDetail(lastSyncedAt) {
+  if (!navigator.onLine) return 'Offline';
+  if (!lastSyncedAt) return 'Not yet';
+  return `Last ${new Date(lastSyncedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+}
+
+function updateSettingsSyncStatus(status, lastSyncedAt) {
+  const el = document.getElementById('settings-sync-status');
+  const user = getCurrentUser();
+  if (!user) {
+    el.textContent = '';
+    return;
+  }
+
+  const label = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync error', idle: 'Idle' }[status] || 'Sync';
+  const detail = formatSyncDetail(lastSyncedAt);
+  el.textContent = detail ? `${label} · ${detail}` : label;
 }
 
 // ── Auth state → UI ────────────────────────────
@@ -87,6 +122,7 @@ function updateAuthUI(user) {
   const indicator = document.getElementById('sync-indicator');
   if (!user) {
     indicator.classList.add('hidden');
+    document.getElementById('sync-indicator-text').classList.add('hidden');
   }
 
   // Settings screen account section
@@ -122,6 +158,7 @@ function updateAuthUI(user) {
 initHome({
   onStart:   (params) => navigate('shooting', params),
   onHistory: () => navigate('history'),
+  onAnalytics: () => navigate('analytics'),
 });
 
 initShooting({
@@ -137,6 +174,10 @@ initHistory({
   onBack: () => navigate('home'),
 });
 
+initAnalytics({
+  onBack: () => navigate('home'),
+});
+
 initSignInScreen();
 
 // Settings back button
@@ -146,6 +187,11 @@ document.getElementById('btn-settings-back').addEventListener('click', () => {
 document.getElementById('btn-sign-out').addEventListener('click', async () => {
   await signOutUser();
   navigate('home');
+});
+document.getElementById('btn-sync-now').addEventListener('click', async () => {
+  if (!getCurrentUser()) return;
+  await pullFromCloud();
+  if (currentScreen === 'history') historyEnter();
 });
 document.getElementById('btn-settings-signin').addEventListener('click', async () => {
   try { await signInGoogle(); } catch (_) {}
@@ -159,6 +205,24 @@ window.addEventListener('trapnskeet:synced', () => {
 // ── Subscribe to auth + sync state ────────────
 onUserChange(updateAuthUI);
 onSyncStatusChange(updateSyncIndicator);
+onSyncMetaChange(({ status, lastSyncedAt }) => {
+  updateSettingsSyncStatus(status, lastSyncedAt);
+});
+
+window.addEventListener('online', async () => {
+  const status = getSyncStatus();
+  updateSyncIndicator(status);
+  updateSettingsSyncStatus(status, getLastSyncedAt());
+  if (getCurrentUser()) {
+    await pullFromCloud();
+    if (currentScreen === 'history') historyEnter();
+  }
+});
+window.addEventListener('offline', () => {
+  const status = getSyncStatus();
+  updateSyncIndicator(status);
+  updateSettingsSyncStatus(status, getLastSyncedAt());
+});
 
 // ── Boot ───────────────────────────────────────
 async function boot() {
@@ -180,6 +244,22 @@ async function boot() {
     navigate('signin');
     localStorage.setItem('trapnskeet_seen_auth', '1');
   }
+
+  // Auto-sync: pull from cloud every 5 minutes when signed in and online
+  setInterval(async () => {
+    if (getCurrentUser() && navigator.onLine) {
+      await pullFromCloud();
+      if (currentScreen === 'history') historyEnter();
+    }
+  }, 5 * 60 * 1000);
+
+  // Auto-sync: pull from cloud when tab becomes visible again
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && getCurrentUser() && navigator.onLine) {
+      await pullFromCloud();
+      if (currentScreen === 'history') historyEnter();
+    }
+  });
 }
 
 boot();

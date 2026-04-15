@@ -5,12 +5,14 @@
 import { createRound, saveRound, loadSettings } from '../storage.js';
 import { saveRoundToCloud } from '../sync.js';
 import { disciplineLabel, vibrate, confirm } from '../utils.js';
-import { AmericanTrapEngine } from '../disciplines/american-trap.js';
-import { SkeetEngine }        from '../disciplines/skeet.js';
-import { OlympicTrapEngine }  from '../disciplines/olympic-trap.js';
+import { AmericanTrapEngine, HandicapTrapEngine } from '../disciplines/american-trap.js';
+import { SkeetEngine }              from '../disciplines/skeet.js';
+import { OlympicTrapEngine }        from '../disciplines/olympic-trap.js';
+import { StationPracticeEngine }    from '../disciplines/station-practice.js';
 
 let engine      = null;
 let round       = null;
+let activeYardage = null;
 let onDoneCallback = null;
 
 export function initShooting({ onDone }) {
@@ -22,21 +24,40 @@ export function initShooting({ onDone }) {
   document.getElementById('btn-end-round').addEventListener('click', endRoundEarly);
 }
 
-export function onEnter({ discipline, mode }) {
+export function onEnter({ discipline, mode, yardage, practiceConfig }) {
+  activeYardage = yardage ?? null;
+
   // Create engine
-  if (discipline === 'american_trap') {
+  if (mode === 'station_practice' && practiceConfig) {
+    engine = new StationPracticeEngine({ discipline, practiceConfig });
+  } else if (discipline === 'american_trap') {
     engine = new AmericanTrapEngine();
+  } else if (discipline === 'handicap_trap') {
+    engine = new HandicapTrapEngine(activeYardage);
   } else if (discipline === 'skeet') {
     engine = new SkeetEngine();
   } else {
     engine = new OlympicTrapEngine(mode);
   }
 
-  // Create round object
-  round = createRound(discipline, mode);
+  // Create round object (attach yardage for handicap; practiceConfig for station practice)
+  round = createRound(
+    discipline,
+    mode,
+    discipline === 'handicap_trap' ? activeYardage : null,
+    mode === 'station_practice' ? practiceConfig : null,
+  );
 
   // Update static labels
-  document.getElementById('shooting-discipline-label').textContent = disciplineLabel(discipline);
+  let label;
+  if (mode === 'station_practice') {
+    label = `${disciplineLabel(discipline)} · Practice`;
+  } else if (discipline === 'handicap_trap' && activeYardage) {
+    label = `Handicap Trap · ${activeYardage} yd`;
+  } else {
+    label = disciplineLabel(discipline);
+  }
+  document.getElementById('shooting-discipline-label').textContent = label;
   document.getElementById('shooting-max').textContent = engine.total;
   document.body.dataset.discipline = discipline;
 
@@ -160,12 +181,14 @@ function renderDiagram(shot) {
   const el   = document.getElementById('station-diagram');
   const disc = round.discipline;
 
-  if (disc === 'american_trap') {
+  if (disc === 'american_trap' || disc === 'handicap_trap') {
     el.innerHTML = buildTrapDiagram(shot.station, 5);
   } else if (disc === 'skeet') {
     el.innerHTML = buildSkeetDiagram(shot);
-  } else {
+  } else if (disc === 'olympic_trap') {
     el.innerHTML = buildTrapDiagram(shot.station, 6);
+  } else {
+    el.innerHTML = '';
   }
 }
 

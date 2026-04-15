@@ -39,6 +39,7 @@ export class AmericanTrapEngine {
     this._snapshots = [];
   }
 
+
   get total() { return 25; }
 
   getCurrentShot() {
@@ -105,6 +106,93 @@ export class AmericanTrapEngine {
         label: `St. ${st}`,
         shots: stShots,
         hits: stShots.filter(s => s.result === 'hit').length,
+        total: stShots.length,
+      });
+    }
+    return breakdown;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// HandicapTrapEngine — Handicap Trap sequence engine
+//
+// Same rules as American Trap (5 stations × 5 shots = 25),
+// but the shooter stands at a personal yardage (16–27 yards).
+// ═══════════════════════════════════════════════
+
+export class HandicapTrapEngine {
+  constructor(yardage = 20) {
+    this.yardage  = yardage;
+    this.sequence = buildSequence();
+    this.pointer  = 0;
+    this.score    = 0;
+    this.shots    = [];
+    this._snapshots = [];
+  }
+
+  get total() { return 25; }
+
+  getCurrentShot() {
+    return this.sequence[this.pointer] || null;
+  }
+
+  getCurrentGuidance() {
+    const shot = this.getCurrentShot();
+    if (!shot) return '';
+    const isFirst = shot.shotNum === 1;
+    return getGuidance(shot, isFirst) + ` Shooting from ${this.yardage} yards.`;
+  }
+
+  recordResult(result) {
+    const shot = this.getCurrentShot();
+    if (!shot) return true;
+
+    this._snapshots.push({
+      pointer:  this.pointer,
+      score:    this.score,
+      shotsLen: this.shots.length,
+    });
+
+    this.shots.push({
+      shotIndex: this.pointer,
+      station:   shot.station,
+      shotNum:   shot.shotNum,
+      type:      shot.type,
+      result,
+      isOption:  false,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (result === 'hit') this.score++;
+    this.pointer++;
+    return this.isComplete();
+  }
+
+  undoLast() {
+    if (this._snapshots.length === 0) return false;
+    const snap = this._snapshots.pop();
+    this.pointer = snap.pointer;
+    this.score   = snap.score;
+    this.shots.splice(snap.shotsLen);
+    return true;
+  }
+
+  isComplete() {
+    return this.pointer >= this.total;
+  }
+
+  getProgress() {
+    return { current: this.pointer, total: this.total, score: this.score };
+  }
+
+  getStationBreakdown() {
+    const breakdown = [];
+    for (let st = 1; st <= 5; st++) {
+      const stShots = this.shots.filter(s => s.station === st);
+      breakdown.push({
+        label: `St. ${st}`,
+        shots: stShots,
+        hits:  stShots.filter(s => s.result === 'hit').length,
         total: stShots.length,
       });
     }

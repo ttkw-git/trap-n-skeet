@@ -50,6 +50,7 @@
       <h1 class="app-title">Trap N Skeet</h1>
       <div class="header-right">
         <div id="sync-indicator" class="sync-indicator hidden" title="Sync status"></div>
+        <div id="sync-indicator-text" class="sync-indicator-text hidden"></div>
         <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙</button>
       </div>
     </header>
@@ -75,14 +76,75 @@
           <span class="discipline-name">Olympic Trap</span>
           <span class="discipline-desc">6 stations · 25 or 125 shots</span>
         </button>
+
       </div>
 
-      <!-- Olympic Trap mode selector (shown only when Olympic is selected) -->
+      <!-- American Trap mode selector (shown only when American Trap is selected) -->
+      <div id="american-mode-selector" class="mode-selector hidden">
+        <p class="mode-label">Select Mode</p>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-set-discipline="american_trap">Standard</button>
+          <button class="mode-btn" data-set-discipline="handicap_trap">Handicap</button>
+          <button class="mode-btn" data-show-practice="american_trap">Station Practice</button>
+        </div>
+      </div>
+
+      <!-- Handicap yardage stepper (shown only when Handicap mode is active) -->
+      <div id="handicap-yardage-selector" class="mode-selector hidden">
+        <p class="mode-label">Handicap Yardage</p>
+        <div class="yardage-stepper">
+          <button id="yardage-dec" class="yardage-step-btn" aria-label="Decrease yardage">−</button>
+          <span id="yardage-value" class="yardage-display">20 yd</span>
+          <button id="yardage-inc" class="yardage-step-btn" aria-label="Increase yardage">+</button>
+        </div>
+      </div>
+
+      <!-- Skeet mode selector (shown only when Skeet is selected) -->
+      <div id="skeet-mode-selector" class="mode-selector hidden">
+        <p class="mode-label">Select Mode</p>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="practice_25">Competition (25 shots)</button>
+          <button class="mode-btn" data-show-practice="skeet">Station Practice</button>
+        </div>
+      </div>
+
+      <!-- Olympic Trap mode selector (shown only when Olympic Trap is selected) -->
       <div id="olympic-mode-selector" class="mode-selector hidden">
         <p class="mode-label">Select Mode</p>
         <div class="mode-toggle">
           <button class="mode-btn active" data-mode="practice_25">Practice (25 shots)</button>
           <button class="mode-btn" data-mode="competition_125">Competition (125 shots)</button>
+          <button class="mode-btn" data-show-practice="olympic_trap">Station Practice</button>
+        </div>
+      </div>
+
+      <!-- Station Practice selector (shown when Station Practice is chosen for any discipline) -->
+      <div id="station-practice-selector" class="mode-selector hidden">
+        <div class="practice-selector-header">
+          <p class="mode-label">Select Stations</p>
+          <div class="practice-select-all-row">
+            <button id="practice-select-all" class="text-btn practice-text-btn">Select All</button>
+            <span class="practice-select-divider">·</span>
+            <button id="practice-deselect-all" class="text-btn practice-text-btn">None</button>
+          </div>
+        </div>
+        <!-- Populated dynamically by home.js based on selected discipline -->
+        <div id="practice-station-list" class="practice-station-list"></div>
+
+        <div class="practice-shot-count-wrap">
+          <p class="mode-label">Shot Count</p>
+          <div class="practice-shot-presets">
+            <button class="mode-btn practice-preset-btn" data-count="10">10</button>
+            <button class="mode-btn active practice-preset-btn" data-count="25">25</button>
+            <button class="mode-btn practice-preset-btn" data-count="50">50</button>
+            <button class="mode-btn practice-preset-btn" data-count="custom">Custom</button>
+          </div>
+          <input id="practice-custom-count" class="settings-input practice-custom-input hidden"
+            type="number" min="1" max="200" value="25" placeholder="1–200" inputmode="numeric">
+        </div>
+
+        <div id="practice-validation-msg" class="practice-validation hidden">
+          Select at least one station to begin.
         </div>
       </div>
 
@@ -91,6 +153,7 @@
 
     <footer class="home-footer">
       <button id="btn-history" class="text-btn">📋 View History</button>
+      <button id="btn-analytics" class="text-btn">📈 View Analytics</button>
     </footer>
   </div>
 
@@ -116,6 +179,7 @@
             </div>
           </div>
           <div id="settings-sync-status" class="account-sync-status"></div>
+          <button id="btn-sync-now" class="secondary-btn" style="margin-top:8px">⟳ Sync Now</button>
           <button id="btn-sign-out" class="danger-btn" style="margin-top:8px">Sign Out</button>
         </div>
         <div id="settings-signed-out" class="hidden">
@@ -233,6 +297,7 @@
 
       <div class="summary-actions">
         <button id="btn-shoot-again" class="start-btn">Shoot Again</button>
+        <button id="btn-share-round" class="secondary-btn">Share Scorecard</button>
         <button id="btn-go-history" class="text-btn">View History</button>
       </div>
     </main>
@@ -248,6 +313,48 @@
       <span></span>
     </header>
     <main class="history-main">
+      <div class="history-toolbar">
+        <div class="history-filters-grid">
+          <label class="history-filter-field">
+            <span>Discipline</span>
+            <select id="history-filter-discipline" class="history-input">
+              <option value="all">All</option>
+              <option value="american_trap">American Trap</option>
+              <option value="skeet">Skeet</option>
+              <option value="olympic_trap">Olympic Trap</option>
+              <option value="handicap_trap">Handicap Trap</option>
+            </select>
+          </label>
+          <label class="history-filter-field">
+            <span>From</span>
+            <input id="history-filter-from" class="history-input" type="date">
+          </label>
+          <label class="history-filter-field">
+            <span>To</span>
+            <input id="history-filter-to" class="history-input" type="date">
+          </label>
+          <label class="history-filter-field">
+            <span>Min %</span>
+            <input id="history-filter-min-pct" class="history-input" type="number" min="0" max="100" step="1" placeholder="0">
+          </label>
+          <label class="history-filter-field history-filter-wide">
+            <span>Search</span>
+            <input id="history-filter-query" class="history-input" type="text" maxlength="40" placeholder="Discipline or mode">
+          </label>
+          <div class="history-filter-field history-filter-practice-row">
+            <label for="history-filter-practice">Include Practice Rounds</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="history-filter-practice">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="history-toolbar-actions">
+          <button id="btn-history-clear-filters" class="secondary-btn">Reset Filters</button>
+          <button id="btn-export-csv" class="secondary-btn">Export CSV</button>
+          <button id="btn-export-json" class="secondary-btn">Export JSON</button>
+        </div>
+      </div>
       <div id="history-stats" class="history-stats"></div>
       <div id="history-list" class="history-list"></div>
       <div id="history-empty" class="history-empty hidden">
@@ -255,6 +362,63 @@
         <p>Start a round to see your history here.</p>
       </div>
       <button id="btn-clear-history" class="danger-btn hidden">🗑 Clear All History</button>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCREEN: ANALYTICS
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-analytics" class="screen hidden">
+    <header class="app-header">
+      <button class="icon-btn" id="btn-analytics-back" aria-label="Back">←</button>
+      <h2 class="screen-title">Analytics</h2>
+      <span></span>
+    </header>
+    <main class="analytics-main">
+      <div class="analytics-toolbar">
+        <label class="analytics-field">
+          <span>Discipline</span>
+          <select id="analytics-discipline" class="history-input">
+            <option value="all">All</option>
+            <option value="american_trap">American Trap</option>
+            <option value="skeet">Skeet</option>
+            <option value="olympic_trap">Olympic Trap</option>
+            <option value="handicap_trap">Handicap Trap</option>
+          </select>
+        </label>
+        <label class="analytics-field">
+          <span>Window</span>
+          <select id="analytics-window" class="history-input">
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="all">All time</option>
+          </select>
+        </label>
+        <div class="analytics-field analytics-practice-toggle">
+          <label for="analytics-include-practice">Include Practice</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="analytics-include-practice">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <section class="analytics-card">
+        <h3>Score Trend</h3>
+        <div id="analytics-trend-empty" class="analytics-empty hidden">Not enough rounds to render a trend yet.</div>
+        <svg id="analytics-trend-chart" class="analytics-trend-chart" viewBox="0 0 320 160" preserveAspectRatio="none"></svg>
+        <div id="analytics-trend-legend" class="analytics-trend-legend hidden">
+          <span><i class="legend-line legend-main"></i> Round %</span>
+          <span><i class="legend-line legend-avg"></i> Moving Avg (5)</span>
+          <span><i class="legend-line legend-best"></i> Personal Best</span>
+        </div>
+      </section>
+
+      <section class="analytics-card">
+        <h3>Station Performance</h3>
+        <div id="analytics-station-empty" class="analytics-empty hidden">No station data for current filters.</div>
+        <div id="analytics-station-bars" class="analytics-station-bars"></div>
+      </section>
     </main>
   </div>
 

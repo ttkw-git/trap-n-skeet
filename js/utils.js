@@ -28,6 +28,7 @@ export function disciplineLabel(discipline) {
     american_trap: 'American Trap',
     skeet:         'Skeet',
     olympic_trap:  'Olympic Trap',
+    handicap_trap: 'Handicap Trap',
   }[discipline] || discipline;
 }
 
@@ -36,6 +37,7 @@ export function disciplineAccentClass(discipline) {
     american_trap: 'trap',
     skeet:         'skeet',
     olympic_trap:  'olympic',
+    handicap_trap: 'handicap',
   }[discipline] || 'trap';
 }
 
@@ -44,6 +46,7 @@ export function disciplineDotColor(discipline) {
     american_trap: 'var(--accent-trap)',
     skeet:         'var(--accent-skeet)',
     olympic_trap:  'var(--accent-olympic)',
+    handicap_trap: 'var(--accent-handicap)',
   }[discipline] || 'var(--accent-trap)';
 }
 

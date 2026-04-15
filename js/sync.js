@@ -14,7 +14,7 @@ import {
   auth, db, googleProvider,
   signInWithPopup, signInWithRedirect, getRedirectResult,
   signOut, onAuthStateChanged,
-  doc, setDoc, getDocs, collection,
+  doc, setDoc, getDocs, collection, writeBatch,
 } from './firebase.js';
 
 import { loadAllRounds, saveRound as saveLocal } from './storage.js';
@@ -24,6 +24,10 @@ let _currentUser   = null;
 let _authListeners = [];  // callbacks: (user) => void
 let _syncStatus    = 'idle'; // 'idle' | 'syncing' | 'synced' | 'error'
 let _statusListeners = [];
+let _metaListeners = [];
+
+const LAST_SYNC_KEY = 'trapnskeet_last_synced_at';
+let _lastSyncedAt = localStorage.getItem(LAST_SYNC_KEY) || null;
 
 // ── Auth listeners ─────────────────────────────
 
@@ -40,9 +44,20 @@ export function onSyncStatusChange(callback) {
   callback(_syncStatus);
 }
 
+/** Register a callback for sync status + timestamp metadata updates. */
+export function onSyncMetaChange(callback) {
+  _metaListeners.push(callback);
+  callback({ status: _syncStatus, lastSyncedAt: _lastSyncedAt });
+}
+
 function setSyncStatus(status) {
   _syncStatus = status;
+  if (status === 'synced') {
+    _lastSyncedAt = new Date().toISOString();
+    localStorage.setItem(LAST_SYNC_KEY, _lastSyncedAt);
+  }
   _statusListeners.forEach(fn => fn(status));
+  _metaListeners.forEach(fn => fn({ status, lastSyncedAt: _lastSyncedAt }));
 }
 
 // ── Bootstrap ──────────────────────────────────
@@ -99,6 +114,10 @@ export function getCurrentUser() {
 
 export function getSyncStatus() {
   return _syncStatus;
+}
+
+export function getLastSyncedAt() {
+  return _lastSyncedAt;
 }
 
 // ── Cloud write ────────────────────────────────
@@ -186,5 +205,24 @@ async function pushAllToCloud() {
   for (const round of rounds) {
     const ref = doc(db, 'users', _currentUser.uid, 'rounds', round.id);
     await setDoc(ref, round);
+  }
+}
+
+/**
+ * Delete all round documents from Firestore for the current user.
+ * Called when the user clears history, so cloud data can't restore after reload.
+ */
+export async function clearAllRoundsFromCloud() {
+  if (!_currentUser) return;
+  try {
+    const snapshot = await getDocs(
+      collection(db, 'users', _currentUser.uid, 'rounds')
+    );
+    if (snapshot.empty) return;
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(docSnap => batch.delete(docSnap.ref));
+    await batch.commit();
+  } catch (err) {
+    console.warn('Cloud clear failed (local data already cleared):', err.message);
   }
 }

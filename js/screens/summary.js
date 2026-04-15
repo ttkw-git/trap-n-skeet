@@ -3,9 +3,12 @@
 // ═══════════════════════════════════════════════
 
 import { disciplineLabel, formatPercent, getRating } from '../utils.js';
+import { shareRoundAsImage } from '../share.js';
 
 let onShootAgainCallback = null;
 let onHistoryCallback    = null;
+let currentRound         = null;
+let currentEngine        = null;
 
 export function initSummary({ onShootAgain, onHistory }) {
   onShootAgainCallback = onShootAgain;
@@ -13,13 +16,24 @@ export function initSummary({ onShootAgain, onHistory }) {
 
   document.getElementById('btn-shoot-again').addEventListener('click', onShootAgainCallback);
   document.getElementById('btn-go-history').addEventListener('click', onHistoryCallback);
+  document.getElementById('btn-share-round').addEventListener('click', () => {
+    shareRoundAsImage(currentRound, currentEngine);
+  });
 }
 
 export function onEnter({ round, engine }) {
+  currentRound  = round;
+  currentEngine = engine;
   const { discipline, score, maxScore } = round;
   const pct = formatPercent(score, maxScore);
 
-  document.getElementById('summary-discipline').textContent = disciplineLabel(discipline);
+  const disciplineDisplay =
+    round.mode === 'station_practice'
+      ? `${disciplineLabel(discipline)} · Practice`
+      : discipline === 'handicap_trap' && round.yardage
+        ? `Handicap Trap · ${round.yardage} yd`
+        : disciplineLabel(discipline);
+  document.getElementById('summary-discipline').textContent = disciplineDisplay;
   document.getElementById('summary-score').textContent      = score;
   document.getElementById('summary-max').textContent        = maxScore;
   document.getElementById('summary-percent').textContent    = pct;
