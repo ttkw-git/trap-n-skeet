@@ -341,13 +341,13 @@
             <span>Search</span>
             <input id="history-filter-query" class="history-input" type="text" maxlength="40" placeholder="Discipline or mode">
           </label>
-          <label class="history-filter-field history-filter-practice-row">
-            <span>Include Practice Rounds</span>
+          <div class="history-filter-field history-filter-practice-row">
+            <label for="history-filter-practice">Include Practice Rounds</label>
             <label class="toggle-switch">
               <input type="checkbox" id="history-filter-practice">
               <span class="toggle-slider"></span>
             </label>
-          </label>
+          </div>
         </div>
         <div class="history-toolbar-actions">
           <button id="btn-history-clear-filters" class="secondary-btn">Reset Filters</button>
@@ -394,13 +394,13 @@
             <option value="all">All time</option>
           </select>
         </label>
-        <label class="analytics-field analytics-practice-toggle">
-          <span>Include Practice</span>
+        <div class="analytics-field analytics-practice-toggle">
+          <label for="analytics-include-practice">Include Practice</label>
           <label class="toggle-switch">
             <input type="checkbox" id="analytics-include-practice">
             <span class="toggle-slider"></span>
           </label>
-        </label>
+        </div>
       </div>
 
       <section class="analytics-card">

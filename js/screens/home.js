@@ -12,10 +12,9 @@ let onStartCallback        = null;
 let onHistoryCallback      = null;
 let onAnalyticsCallback    = null;
 
-// Station counts per discipline
+// Station counts for the three disciplines that support Station Practice
 const STATION_COUNTS = {
   american_trap: 5,
-  handicap_trap: 5,
   skeet:         8,
   olympic_trap:  6,
 };

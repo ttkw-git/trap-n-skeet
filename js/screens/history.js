@@ -191,7 +191,11 @@ function buildHistoryItem(round) {
   // Build title string
   let titleText;
   if (isPractice) {
-    const stations = (round.practiceConfig?.selectedStations || []).join(', ');
+    // Coerce to integers to guard against stored data injection into innerHTML
+    const stations = (round.practiceConfig?.selectedStations || [])
+      .map(Number)
+      .filter(n => Number.isFinite(n) && n > 0)
+      .join(', ');
     titleText = `${disciplineLabel(round.discipline)} · Sts. ${stations}`;
   } else if (round.discipline === 'handicap_trap' && round.yardage) {
     titleText = `Handicap Trap · ${round.yardage} yd`;
