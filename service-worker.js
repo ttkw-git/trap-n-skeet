@@ -3,7 +3,7 @@
 // Bump CACHE_NAME version when deploying updates
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = 'trapnskeet-v8';
+const CACHE_NAME = 'trapnskeet-v9';
 
 const ASSETS = [
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/app.js',
   './js/storage.js',
   './js/utils.js',
+  './js/export.js',
   './js/firebase.js',
   './js/sync.js',
   './js/disciplines/american-trap.js',
