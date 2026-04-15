@@ -1,0 +1,62 @@
+You are working on Trap N Skeet, a static vanilla JavaScript PWA for shotgun score tracking.
+
+Primary stack and constraints
+- Use plain HTML/CSS/JavaScript ES modules only. Do not introduce frameworks (React, Vue, Angular, Svelte) or build tooling unless explicitly requested.
+- Keep the app local-first: `localStorage` behavior must continue to work fully offline.
+- Firebase sync is optional and additive. Never make sign-in or network availability required for core scoring flow.
+- Preserve installable/offline PWA behavior.
+
+Project architecture (follow existing boundaries)
+- `index.html`: single app shell and screen containers.
+- `js/app.js`: app bootstrap, routing between screens, auth/sync indicator updates.
+- `js/screens/*.js`: screen-specific UI logic. Keep screen responsibilities isolated.
+- `js/disciplines/*.js`: discipline rules and shot sequencing logic.
+- `js/storage.js`: local persistence, settings, history transforms.
+- `js/sync.js`: auth and cloud synchronization only.
+- `js/export.js` and `js/share.js`: export/share responsibilities only.
+- `service-worker.js`: offline cache strategy.
+
+Coding rules
+- Match current code style and naming in touched files.
+- Prefer small, targeted edits over broad refactors.
+- Do not rename public functions, exports, IDs, or storage keys unless requested.
+- Avoid adding dependencies.
+- Keep functions focused and testable; extract helpers only when it reduces repeated logic.
+- Add concise comments only for non-obvious logic.
+
+UI and UX rules
+- Preserve current single-page screen flow (home -> shooting -> summary -> history/analytics).
+- Ensure changes are responsive for mobile and desktop.
+- Do not break existing button IDs, screen selectors, or event wiring used by `app.js`.
+- Keep accessibility basics intact: semantic labels, readable contrast, keyboard-accessible controls.
+
+Discipline and scoring invariants
+- Do not alter shot ordering/rules for disciplines unless explicitly requested.
+- Maintain known round structures:
+	- American Trap standard: 25 shots.
+	- Skeet competition: 25 shots with existing option rule behavior.
+	- Olympic Trap competition: 125-shot mode behavior remains intact.
+	- Station practice modes must continue to segment by station correctly.
+- Any scoring change must keep summary, history, analytics, export, and share outputs consistent.
+
+Storage and sync safety
+- Treat local data as source of truth for offline use.
+- Maintain compatibility with existing stored round/settings shapes.
+- If schema changes are necessary, add non-breaking migration logic.
+- Avoid destructive sync behavior; never delete cloud/local data implicitly outside explicit user actions.
+
+PWA and deployment safeguards
+- If cached asset lists or critical static files change, update cache versioning in `service-worker.js`.
+- Keep Firebase CDN/network requests excluded from stale service-worker caching.
+- If deployment base path changes, ensure `manifest.json` `start_url` and `scope` are updated consistently.
+
+When implementing features or fixes
+1. Read the relevant screen + discipline + storage/sync modules first.
+2. Make the minimum coherent set of edits.
+3. Verify no regressions in: round entry, undo, summary, history, analytics, export/share, and offline load.
+4. Summarize changed files and any follow-up checks.
+
+Output expectations for coding tasks
+- Return concrete file edits, not just high-level suggestions.
+- Call out assumptions when requirements are ambiguous.
+- If blocked by missing context, ask a specific question with the smallest required scope.
