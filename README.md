@@ -1,116 +1,143 @@
 # Trap N Skeet
 
-A Progressive Web App (PWA) for tracking shotgun shooting scores across three competitive clay shooting disciplines. Works offline, installs on any device, and optionally syncs rounds across devices via Google sign-in.
+Trap N Skeet is an installable, offline-capable scorekeeping app for clay target shooting. It runs as a static web app, stores rounds locally in the browser, and can optionally sync completed rounds to Firebase when the user signs in with Google.
 
----
+## What it does
 
-## Features
+- Tracks American Trap, Handicap Trap, Skeet, and Olympic Trap rounds.
+- Supports standard rounds, Olympic 125-shot competition, and station practice drills.
+- Records hit and miss results shot-by-shot with undo support and optional guidance text.
+- Shows post-round summaries with station breakdowns and overall rating.
+- Keeps round history locally and supports filtering, analytics, CSV export, JSON export, and scorecard image sharing.
+- Works offline through a service worker and can be installed as a PWA on desktop or mobile.
 
-- **Three disciplines** — American Trap, Skeet, and Olympic Trap
-- **Live shot tracking** — progress bar, station labels, and contextual guidance on every shot
-- **Hit / Miss recording** with haptic vibration feedback (50 ms on hit, pulse pattern on miss)
-- **Undo** — step back through any shot in the current round
-- **Post-round summary** — score, percentage, performance rating, and a station-by-station breakdown
-- **History & stats** — full round history with best score and average per discipline
-- **Data export** — download filtered history as CSV or JSON for analysis/backups
-- **Google sign-in + cloud sync** — Firebase Firestore mirrors rounds across all your devices
-- **Offline-first** — Service Worker caches the app so it works without a network connection
-- **PWA installable** — add to Home Screen on iOS/Android or install via desktop browser
+## Supported modes
 
----
+| Discipline | Modes | Notes |
+|---|---|---|
+| American Trap | Standard 25, Station Practice | 5 stations, 25 shots in standard mode |
+| Handicap Trap | 25-shot round with yardage selector | Yardage is adjustable in the home screen |
+| Skeet | Competition 25, Station Practice | Includes singles, doubles, and the skeet option rule |
+| Olympic Trap | Practice 25, Competition 125, Station Practice | Competition mode is five 25-shot rounds |
 
-## Disciplines
+### Skeet option rule
 
-| Discipline | Stations | Total Shots | Shot Types | Notes |
-|---|---|---|---|---|
-| American Trap | 5 | 25 | Singles | 5 shots per station; targets angle left, straight, or right depending on station |
-| Skeet | 8 | 25 | Singles + Doubles | Doubles at stations 1, 2, 6, 7; **option rule** on first miss (see below) |
-| Olympic Trap | 6 | 25 or 125 | Singles | Shooter cycles 1→2→…→6→1; Practice (25) or Competition (5 rounds of 25) |
+On the first miss in a skeet round, the app inserts an immediate reshoot of that same target and still keeps the round at 25 shots. If no miss occurs before the end of the regular sequence, the 25th shot is Station 7 Low House.
 
-### Skeet Option Rule
-On the **first miss** of a Skeet round the app immediately injects a reshoot of that exact target as the very next shot, removing the placeholder 25th shot to keep the round at 25 shots. If you go clean through shot 24, the 25th shot is a Station 7 Low House single.
+## Main features
 
----
+- Sign in with Google or continue without an account.
+- Local-first storage with `localStorage` as the primary data store.
+- Cloud sync with Firebase Auth and Firestore for signed-in users.
+- Automatic cloud pull on sign-in, when the app comes back online, and on a timed refresh.
+- History filters for discipline, date range, percentage threshold, text query, and practice rounds.
+- Analytics view with trend lines, moving average, personal best, and station-by-station performance.
+- Share a finished round as a generated PNG scorecard.
+- Export filtered history to CSV or JSON.
+- Installable PWA with offline asset caching.
 
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Vanilla JavaScript (ES6 modules), HTML5, CSS3 |
-| Backend | Firebase Authentication (Google Sign-in), Cloud Firestore |
-| Offline | Service Worker (cache-first strategy) |
-| Persistence | localStorage (primary) + Firestore (cloud mirror) |
-| PWA | Web App Manifest, installable on iOS / Android / desktop |
+| UI | HTML, CSS, vanilla JavaScript ES modules |
+| Persistence | Browser `localStorage` |
+| Sync | Firebase Authentication and Cloud Firestore |
+| Offline | Service worker cache |
+| Distribution | Static site / PWA |
 
----
+## Running locally
 
-## Getting Started
+This app must be served over HTTP. Opening [index.html](index.html) directly from disk will not work because the app uses ES modules and a service worker.
 
-The app must be served over HTTP — opening `index.html` directly as a `file://` URL will not work because ES modules and the Service Worker require an HTTP origin.
+### Windows quick start
 
-### Option 1 — Python (macOS / Linux / Windows)
+Run [launch.bat](launch.bat). It starts a local Python HTTP server on `http://localhost:8765` and opens the browser.
+
+### Manual start
+
+From the repository root:
 
 ```bash
-# From the repo root
-python3 -m http.server 8080
+python -m http.server 8765
 ```
 
-Then open `http://localhost:8080` in your browser.
+Then open `http://localhost:8765`.
 
-### Option 2 — Windows batch file
+Any static file server will also work.
 
-Double-click `launch.bat` in the repo root. It starts the Python server and opens the browser automatically.
+## Firebase and sync
 
-### Option 3 — Any static file server
+The repository is already wired to a Firebase project in [js/firebase.js](js/firebase.js). That means Google sign-in and Firestore sync will target that configured project unless you replace the Firebase config with your own.
 
-Serve the repo root with any HTTP server (e.g. `npx serve .`, `npx http-server .`, VS Code Live Server, etc.).
+Current sync behavior:
 
----
+- Local storage is always authoritative for offline use.
+- Completed rounds are pushed to Firestore after the round finishes.
+- On sign-in, cloud rounds are pulled and merged into local storage.
+- If the cloud is empty, the app uploads completed local rounds.
+- Clearing history removes both local data and the signed-in user's cloud rounds.
 
-## PWA Installation
+## PWA and deployment notes
 
-| Platform | Steps |
-|---|---|
-| **iOS (Safari)** | Open the app URL → tap the Share icon → "Add to Home Screen" |
-| **Android (Chrome)** | Open the app URL → tap the three-dot menu → "Add to Home screen" |
-| **Desktop (Chrome / Edge)** | Open the app URL → click the install icon in the address bar |
+The manifest in [manifest.json](manifest.json) is currently scoped to `/trap-n-skeet/`, which matches a GitHub Pages project-site style deployment. If you deploy under a different path, update `start_url` and `scope` to match your hosting location.
 
----
+The service worker in [service-worker.js](service-worker.js) caches the core app shell and excludes Firebase CDN requests from caching so auth and Firestore SDK requests stay fresh.
 
-## Project Structure
+## Project structure
 
+```text
+Trap_N_Skeet/
+|-- index.html
+|-- manifest.json
+|-- service-worker.js
+|-- launch.bat
+|-- README.md
+|-- css/
+|   |-- components.css
+|   `-- theme.css
+|-- icons/
+|   |-- generate-icons.js
+|   |-- generate-icons.py
+|   |-- icon-192.png
+|   |-- icon-512.png
+|   `-- icon.svg
+`-- js/
+    |-- app.js
+    |-- export.js
+    |-- firebase.js
+    |-- share.js
+    |-- storage.js
+    |-- sync.js
+    |-- utils.js
+    |-- disciplines/
+    |   |-- american-trap.js
+    |   |-- olympic-trap.js
+    |   |-- skeet.js
+    |   `-- station-practice.js
+    `-- screens/
+        |-- analytics.js
+        |-- history.js
+        |-- home.js
+        |-- shooting.js
+        `-- summary.js
 ```
-trap-n-skeet/
-├── index.html              # Single-page app — all screens as <div> sections
-├── manifest.json           # PWA manifest (name, icons, theme colour)
-├── service-worker.js       # Offline cache strategy, Firebase CDN bypass
-├── launch.bat              # Windows quick-start launcher
-│
-├── css/
-│   ├── theme.css           # CSS variables, dark theme, fluid typography
-│   └── components.css      # All UI component styles
-│
-├── js/
-│   ├── app.js              # Screen router, auth state, sync indicator
-│   ├── sync.js             # Firebase Auth + Firestore push/pull/merge
-│   ├── storage.js          # localStorage read/write helpers
-│   ├── firebase.js         # Firebase SDK initialisation
-│   ├── utils.js            # Formatting, vibration, confirm dialog
-│   ├── export.js           # CSV / JSON export helpers for round history
-│   │
-│   ├── disciplines/
-│   │   ├── american-trap.js    # AmericanTrapEngine — 5×5 shot sequence
-│   │   ├── skeet.js            # SkeetEngine — singles/doubles + option rule
-│   │   └── olympic-trap.js     # OlympicTrapEngine — practice / competition modes
-│   │
-│   └── screens/
-│       ├── home.js         # Home screen, discipline/mode selection, settings
-│       ├── shooting.js     # Active round UI — hit/miss buttons, undo, exit
-│       ├── summary.js      # Post-round results and station breakdown
-│       └── history.js      # Round history list and per-discipline stats
-│
-└── icons/
-    ├── icon.svg            # Source vector icon
-    ├── icon-192.png        # PWA icon (192 × 192)
-    └── icon-512.png        # PWA icon (512 × 512)
-```
+
+## File guide
+
+- [index.html](index.html): Single-page app shell with all major screens.
+- [js/app.js](js/app.js): Boot logic, router, auth screen flow, and sync indicator updates.
+- [js/screens/home.js](js/screens/home.js): Discipline selection, settings, handicap yardage, and station practice setup.
+- [js/screens/shooting.js](js/screens/shooting.js): Active round logic, diagrams, hit or miss recording, undo, and early finish.
+- [js/screens/summary.js](js/screens/summary.js): Final score, rating, station breakdown, and share action.
+- [js/screens/history.js](js/screens/history.js): History list, filters, stats, and exports.
+- [js/screens/analytics.js](js/screens/analytics.js): Trend chart and station performance analytics.
+- [js/storage.js](js/storage.js): Round persistence, settings persistence, and analytics data shaping.
+- [js/sync.js](js/sync.js): Firebase authentication and round synchronization.
+- [js/share.js](js/share.js): PNG scorecard rendering and native share or download fallback.
+
+## Notes for maintenance
+
+- If you change cached assets, bump the cache name in [service-worker.js](service-worker.js).
+- If you deploy anywhere other than `/trap-n-skeet/`, update the manifest path settings.
+- If you fork this project and want your own backend, replace the Firebase config and apply your own Firestore security rules.
