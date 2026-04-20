@@ -135,8 +135,14 @@ function updateAuthUI(user) {
 
     // Avatar: photo if available, else first letter of name
     const avatar = document.getElementById('settings-avatar');
+    avatar.innerHTML = '';
     if (user.photoURL) {
-      avatar.innerHTML = `<img src="${user.photoURL}" alt="">`;
+      const img = document.createElement('img');
+      img.src = user.photoURL;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      avatar.appendChild(img);
     } else {
       avatar.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
     }

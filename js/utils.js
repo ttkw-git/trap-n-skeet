@@ -50,6 +50,15 @@ export function disciplineDotColor(discipline) {
   }[discipline] || 'var(--accent-trap)';
 }
 
+export function escapeHtml(text) {
+  return String(text ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 // Vibration feedback (silently fails if not supported)
 export function vibrate(pattern) {
   try {
