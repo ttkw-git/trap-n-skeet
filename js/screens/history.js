@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════
 
 import { loadAllRounds, clearAllRounds } from '../storage.js';
-import { disciplineLabel, disciplineDotColor, formatDate, formatPercent, confirm } from '../utils.js';
+import { disciplineLabel, disciplineDotColor, formatDate, formatPercent, confirm, escapeHtml } from '../utils.js';
 import { downloadRoundsAsCSV, downloadRoundsAsJSON } from '../export.js';
 import { clearAllRoundsFromCloud } from '../sync.js';
 
@@ -198,7 +198,8 @@ function buildHistoryItem(round) {
       .join(', ');
     titleText = `${disciplineLabel(round.discipline)} · Sts. ${stations}`;
   } else if (round.discipline === 'handicap_trap' && round.yardage) {
-    titleText = `Handicap Trap · ${round.yardage} yd`;
+    const yardage = Number(round.yardage);
+    titleText = `Handicap Trap · ${Number.isFinite(yardage) ? yardage : '?'} yd`;
   } else {
     titleText = `${disciplineLabel(round.discipline)}${round.mode === 'competition_125' ? ' (125)' : ''}`;
   }
@@ -214,12 +215,12 @@ function buildHistoryItem(round) {
     <div class="history-item-header">
       <div class="history-discipline-dot" style="background:${color}"></div>
       <div class="history-item-info">
-        <div class="history-item-title">${titleText}${practiceBadge}</div>
-        <div class="history-item-date">${date}</div>
+        <div class="history-item-title">${escapeHtml(titleText)}${practiceBadge}</div>
+        <div class="history-item-date">${escapeHtml(date)}</div>
       </div>
       <div>
-        <div class="history-item-score">${round.score}/${round.maxScore}</div>
-        <div class="history-item-pct">${pct}</div>
+        <div class="history-item-score">${escapeHtml(round.score)}/${escapeHtml(round.maxScore)}</div>
+        <div class="history-item-pct">${escapeHtml(pct)}</div>
       </div>
       <div class="history-expand-icon">▼</div>
     </div>
@@ -250,7 +251,9 @@ function buildDetailDots(round) {
     const total = shots.length;
     const dotsHtml = shots.map(s => {
       const optClass = s.isOption ? ' option' : '';
-      return `<div class="dot ${s.result}${optClass}" title="${s.isOption ? 'Option reshoot: ' : ''}${s.result}"></div>`;
+      const resultClass = s.result === 'hit' ? 'hit' : 'miss';
+      const title = s.isOption ? `Option reshoot: ${resultClass}` : resultClass;
+      return `<div class="dot ${resultClass}${optClass}" title="${title}"></div>`;
     }).join('');
 
     html += `
